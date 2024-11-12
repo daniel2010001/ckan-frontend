@@ -10,6 +10,24 @@ export default {
         sm: "calc(var(--radius) - 4px)",
       },
       colors: {
+        custom: {
+          primary: {
+            1: "rgb(249, 177, 84)",
+            2: "rgb(234, 84, 124)",
+            3: "rgb(109, 86, 160)",
+            4: "rgb(74, 193, 224)",
+            5: "rgb(79, 185, 168)",
+          },
+          secondary: {
+            1: "rgb(241, 135, 33)",
+            2: "rgb(174, 24, 87)",
+            3: "rgb(72, 39, 120)",
+            4: "rgb(0, 172, 216)",
+            5: "rgb(0, 152, 119)",
+          },
+          black: "rgb(60, 60, 59)",
+          gray: "rgb(112, 111, 111)",
+        },
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         card: {
@@ -51,6 +69,7 @@ export default {
           5: "hsl(var(--chart-5))",
         },
       },
+      fontFamily: { arciform: ["Arciform", "sans-serif"], poppins: ["Poppins", "sans-serif"] },
     },
   },
   plugins: [require("tailwindcss-animate")],
