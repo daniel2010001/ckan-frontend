@@ -35,7 +35,10 @@ import { Avatar, AvatarFallback, AvatarImage } from "@radix-ui/react-avatar";
 export function DropdownMenuDemo() {
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild className="h-12 w-12 rounded-full overflow-hidden p-0">
+      <DropdownMenuTrigger
+        asChild
+        className="flex h-12 w-12 items-center justify-center rounded-full overflow-hidden p-0"
+      >
         <Avatar>
           <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />
           <AvatarFallback>CN</AvatarFallback>
