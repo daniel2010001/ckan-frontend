@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui";
 
-function Login() {
+export function Login() {
   return (
     <div>
       Login

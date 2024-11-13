@@ -7,7 +7,7 @@ interface NotFoundRouteProps {
   children: React.ReactNode;
 }
 
-function NotFoundRoute({ children }: NotFoundRouteProps) {
+export function NotFoundRoute({ children }: NotFoundRouteProps) {
   return (
     <Routes>
       {children}
@@ -16,5 +16,3 @@ function NotFoundRoute({ children }: NotFoundRouteProps) {
     </Routes>
   );
 }
-
-export default NotFoundRoute;
