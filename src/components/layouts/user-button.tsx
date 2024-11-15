@@ -15,7 +15,6 @@ import {
   Users,
 } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -37,7 +36,7 @@ export function DropdownMenuDemo() {
     <DropdownMenu>
       <DropdownMenuTrigger
         asChild
-        className="flex h-12 w-12 items-center justify-center rounded-full overflow-hidden p-0"
+        className="flex h-11 w-11 items-center justify-center rounded-full overflow-hidden p-0"
       >
         <Avatar>
           <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />
