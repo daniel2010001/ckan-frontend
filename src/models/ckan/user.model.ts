@@ -35,3 +35,22 @@ export interface User {
   email: string;
   imageDisplayUrl: string | null;
 }
+
+export const inicialUser: User = {
+  id: "",
+  name: "",
+  fullName: null,
+  created: "",
+  about: null,
+  lastActive: null,
+  activityStreamsEmailNotifications: false,
+  sysadmin: false,
+  state: "",
+  imageUrl: null,
+  displayName: "",
+  emailHash: "",
+  numberCreatedPackages: 0,
+  apiKey: null,
+  email: "",
+  imageDisplayUrl: null,
+};

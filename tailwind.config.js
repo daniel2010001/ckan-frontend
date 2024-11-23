@@ -69,7 +69,14 @@ export default {
           5: "hsl(var(--chart-5))",
         },
       },
-      fontFamily: { arciform: ["Arciform", "sans-serif"], poppins: ["Poppins", "sans-serif"] },
+      fontFamily: { 
+        arciform: ["Arciform", "sans-serif"], 
+        poppins: ["Poppins", "sans-serif"]
+      },
+      spacing: {
+        "navbar-height": "4rem",
+        "-navbar-height": "calc(100vh - 4rem)",
+      },
     },
   },
   plugins: [require("tailwindcss-animate")],

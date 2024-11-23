@@ -30,8 +30,13 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@radix-ui/react-avatar";
+import { useAuthStore } from "@/hooks";
 
-export function DropdownMenuDemo() {
+export function AccountButton() {
+  const { logout } = useAuthStore();
+  const onLogout = () => {
+    logout().then(() => (window.location.href = "/login"));
+  };
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
@@ -117,7 +122,7 @@ export function DropdownMenuDemo() {
           <span>API</span>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem>
+        <DropdownMenuItem onClick={onLogout}>
           <LogOut />
           <span>Log out</span>
           <DropdownMenuShortcut>⇧⌘Q</DropdownMenuShortcut>

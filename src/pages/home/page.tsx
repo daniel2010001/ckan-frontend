@@ -1,20 +1,20 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 
+import { Footer } from "@/components/layouts";
 import { Background, Button, buttonVariants, Input, Separator } from "@/components/ui/";
 import { cn } from "@/lib/utils";
 import { DatasetRoutes } from "@/models";
-import { Footer } from "@/components/layouts";
 
 import callCenterData from "@/assets/icons/call-center-data.svg";
 import environment from "@/assets/icons/environment.svg";
 import health from "@/assets/icons/health.svg";
+import organization from "@/assets/icons/organization.svg";
 import overdue from "@/assets/icons/overdue.svg";
+import popularity from "@/assets/icons/popularity.svg";
 import population from "@/assets/icons/population.svg";
 import townPlanning from "@/assets/icons/town-planning.svg";
-import urbanMobility from "@/assets/icons/urban-mobility.svg";
-import popularity from "@/assets/icons/popularity.svg";
 import update from "@/assets/icons/update.svg";
-import organization from "@/assets/icons/organization.svg";
+import urbanMobility from "@/assets/icons/urban-mobility.svg";
 import noticias from "@/assets/images/noticias.png";
 import { Search } from "lucide-react";
 
@@ -51,16 +51,14 @@ const orderBy: Array<{ text: string; icon: string; sortBy: string }> = [
 ];
 
 export function Home() {
-  const navigate = useNavigate();
   return (
     <div className="flex flex-col items-center justify-center">
       {/* Title */}
       <Background>
         <div className="flex flex-col items-center justify-center px-24 py-12 text-center">
           <div className="font-medium mb-6">
-            <h1 className="text-6xl">COCHABAMBA</h1>
-            <Separator className="mb-2" />
-            <h2 className="text-3xl">Datos Abiertos</h2>
+            <h1 className="text-6xl border-0 border-b-2 border-white">COCHABAMBA</h1>
+            <h2 className="text-3xl mt-2">Datos Abiertos</h2>
           </div>
           <div className="relative w-1/2 flex items-center justify-center text-black">
             <Input type="text" placeholder="Buscar datasets..." className="rounded-full bg-white" />
@@ -86,7 +84,7 @@ export function Home() {
               key={`category-${index}`}
               to={DatasetRoutes.BASE(DatasetRoutes.CATEGORY.replace(":category", to))}
               className={cn(
-                buttonVariants({ variant: "outline" }),
+                buttonVariants({ variant: "ghost" }),
                 "flex items-center justify-start border-none h-auto"
               )}
             >
@@ -102,15 +100,18 @@ export function Home() {
         <h1 className="text-2xl mb-8">VER LISTA DE DATOS</h1>
         <div className="w-full grid grid-cols-1 gap-20 md:grid-cols-2 lg:grid-cols-3">
           {orderBy.map(({ text: name, icon, sortBy }, index) => (
-            <Button
+            <Link
               key={`order-by-${index}`}
-              variant="ghost"
-              className="flex flex-col items-center justify-start border-none h-auto"
-              onClick={() => navigate(DatasetRoutes.BASE(), { state: { sortBy: sortBy } })}
+              to={DatasetRoutes.BASE()}
+              state={{ sortBy: sortBy }}
+              className={cn(
+                buttonVariants({ variant: "ghost" }),
+                "flex flex-col items-center justify-start border-none h-auto"
+              )}
             >
               <img src={icon} alt={name} className="w-16 h-16 my-2 mx-4" />
               <p className="text-2xl font-medium mx-auto mb-4">{name}</p>
-            </Button>
+            </Link>
           ))}
         </div>
       </div>
@@ -130,7 +131,8 @@ export function Home() {
             </div>
           ))}
         </div>
-        {/* Newsletter */}
+
+        {/* News */}
         <div className="col-span-1 flex flex-col items-center justify-center px-24 pb-12 text-center">
           <h1 className="text-2xl mb-4 text-custom-secondary-2">
             SECCI&Oacute;N DE &Uacute;LTIMAS NOTICIAS Y ACTUALIDADES
@@ -143,6 +145,7 @@ export function Home() {
         </div>
       </div>
 
+      {/* Footer */}
       <div className="bottom-0 left-0 flex w-full items-center">
         <Footer />
       </div>
