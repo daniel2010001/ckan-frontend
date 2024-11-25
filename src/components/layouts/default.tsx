@@ -12,7 +12,6 @@ export function DefaultLayout({ children }: DefaultLayoutProps) {
         <div className="flex flex-col flex-1 h-full">
           <div className="fixed top-0 left-0 z-10 flex h-navbar-height w-full items-center justify-between bg-white px-4 py-2 shadow-md">
             <Navbar />
-            <AccountButton />
           </div>
 
           <main className="flex flex-col flex-1 w-full items-center justify-center">

@@ -1,5 +1,6 @@
-import { AxiosResponse, AxiosError } from "axios";
 import { DependencyList, EffectCallback, useEffect, useRef } from "react";
+
+import { AxiosCall } from "@/models";
 
 /**
  * UseEffect que se ejecuta solo una vez después de montar el componente
@@ -18,7 +19,7 @@ export const useEffectAfterMount = (effect: EffectCallback, deps?: DependencyLis
 };
 
 type useEffectAsyncProps<T, D = any> = {
-  asyncFunction: () => Promise<AxiosResponse<T, D> | AxiosError<T, D>>;
+  asyncFunction: () => AxiosCall<T, D>["call"];
   successFunction: (data: T) => void;
   errorFunction?: (error: any) => void;
   returnFunction?: EffectCallback;

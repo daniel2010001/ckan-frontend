@@ -31,12 +31,11 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@radix-ui/react-avatar";
 import { useAuthStore } from "@/hooks";
+import { BaseRoutes } from "@/models";
 
 export function AccountButton() {
   const { logout } = useAuthStore();
-  const onLogout = () => {
-    logout().then(() => (window.location.href = "/login"));
-  };
+  const onLogout = () => logout().then(() => (window.location.href = BaseRoutes.HOME));
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
@@ -44,7 +43,7 @@ export function AccountButton() {
         className="flex h-11 w-11 items-center justify-center rounded-full overflow-hidden p-0"
       >
         <Avatar>
-          <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />
+          {/* <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" /> */}
           <AvatarFallback>CN</AvatarFallback>
         </Avatar>
       </DropdownMenuTrigger>

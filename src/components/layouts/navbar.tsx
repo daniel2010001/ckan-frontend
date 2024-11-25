@@ -11,6 +11,7 @@ import { BaseRoutes } from "@/models";
 
 import logo from "@/assets/images/logo.png";
 import { useAuthStore } from "@/hooks";
+import { AccountButton } from ".";
 
 const components: { title: string; to: string }[] = [
   { title: "DATOS", to: BaseRoutes.DATASET },
@@ -20,7 +21,7 @@ const components: { title: string; to: string }[] = [
 ];
 
 export function Navbar() {
-  const { type } = useAuthStore();
+  const type = useAuthStore().type;
   return (
     <div className="flex h-16 w-full px-4 justify-between">
       <Link to={BaseRoutes.HOME}>
@@ -38,7 +39,9 @@ export function Navbar() {
               </Link>
             </NavigationMenuItem>
           ))}
-          {type && (
+          {type ? (
+            <AccountButton />
+          ) : (
             <NavigationMenuItem className="font-poppins font-semibold">
               <Link
                 to={BaseRoutes.LOGIN}

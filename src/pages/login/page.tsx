@@ -38,7 +38,7 @@ const LoginSchema = z.object({
 
 export function Login() {
   const navigate = useNavigate();
-  const { login, logout } = useAuthStore();
+  const { login, logout, reset } = useAuthStore();
   const { fetchUserDetails } = useUserStore();
 
   const form = useForm<z.infer<typeof LoginSchema>>({
@@ -46,16 +46,12 @@ export function Login() {
     defaultValues: extractDefaultValues(LoginSchema),
   });
 
-  const onValid = async (data: z.infer<typeof LoginSchema>) => {
+  const onSubmit = async (data: z.infer<typeof LoginSchema>) => {
     const authType: AuthType = data.remember ? AuthType.ACCESS_AND_REFRESH : AuthType.TOKEN;
-    await login({ ...data, authType });
-    await fetchUserDetails();
-    navigate(BaseRoutes.HOME, { replace: true, relative: "route" });
-  };
-
-  const onInvalid = async (...error: any) => {
-    console.log(error);
-    await logout().catch((error) => console.log(error));
+    if (!(await login({ ...data, authType }))) return;
+    if (await fetchUserDetails())
+      return navigate(BaseRoutes.HOME, { replace: true, relative: "route" });
+    if (!(await logout())) reset();
   };
 
   return (
@@ -66,7 +62,7 @@ export function Login() {
           <h2 className="text-xl">Datos Abiertos</h2>
         </div>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onValid, onInvalid)}>
+          <form onSubmit={form.handleSubmit(onSubmit)}>
             <FormField
               control={form.control}
               name="username"

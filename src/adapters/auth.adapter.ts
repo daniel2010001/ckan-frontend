@@ -1,4 +1,4 @@
-import { Access, AccessAndRefresh, AuthResponse, Refresh, Sliding, Auth } from "@/models";
+import { Access, AccessAndRefresh, Auth, AuthResponse, Refresh, Sliding } from "@/models";
 
 export class AuthAdapter {
   static isAccess(refreshResponse: any): refreshResponse is Access {
@@ -25,6 +25,7 @@ export class AuthAdapter {
   }
 
   static toAPartialAuth(authResponse: any): Partial<Auth> {
+    console.log(authResponse);
     const auth: Partial<Auth> = {};
     if (AuthAdapter.isAccess(authResponse)) auth.accessToken = authResponse.access;
     if (AuthAdapter.isRefresh(authResponse)) auth.refreshToken = authResponse.refresh;

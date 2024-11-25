@@ -1,4 +1,4 @@
-import { Access, AuthResponse, AuthType, Refresh, Sliding } from "@/models";
+import { Access, AuthRequest, AuthResponse, AuthType, Refresh, Sliding } from "@/models";
 import { UserResponse } from "@/models/ckan";
 import { createAxiosCall } from "@/utils";
 
@@ -8,11 +8,7 @@ export const getUserDetails = () =>
   createAxiosCall<UserResponse>("GET", `${api}/api/users/detail/`);
 
 export const login = (name: string, password: string, authType: AuthType) =>
-  createAxiosCall<AuthResponse, { name: string; password: string }>(
-    "POST",
-    `${api}/api/${authType}/`,
-    { name, password }
-  );
+  createAxiosCall<AuthResponse, AuthRequest>("POST", `${api}/api/${authType}/`, { name, password });
 
 export const logout = (data: Refresh) => createAxiosCall("POST", `${api}/api/logout/`, data);
 
