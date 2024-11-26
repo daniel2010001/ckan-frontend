@@ -1,7 +1,8 @@
 import { create, StateCreator } from "zustand";
 import { persist } from "zustand/middleware";
 
-import { AuthAdapter, UserAdapter } from "@/adapters";
+import { AuthAdapter } from "@/adapters";
+import { UserAdapter } from "@/adapters/ckan";
 import {
   Auth,
   AuthStore,
@@ -15,39 +16,14 @@ import { inicialUser } from "@/models/ckan";
 import { getUserDetails, login, logout, refreshAccessToken, tokenVerification } from "@/services";
 import { loadAbortable } from "@/utils";
 
-const __userStoreMiddleware = (
-  initializer: StateCreator<UserStore, [["zustand/persist", unknown]], []>
-) => persist(initializer, { name: LocalStorageKeys.USER });
-
-// TODO: Mover las funciones de getUserDetails a un nuevo fichero
-export const useUserStore = create<UserStore>()(
-  __userStoreMiddleware((set) => ({
-    user: inicialUser,
-    setUser: (user) => set({ user }),
-    fetchUserDetails: async () => {
-      const userResponse = await loadAbortable(getUserDetails());
-      if (!userResponse || userResponse instanceof Error) return false;
-      set({ user: UserAdapter.toUser(userResponse.data) });
-      return true;
-    },
-    reset: () => set({ user: inicialUser }),
-  }))
-);
-
 const __authStoreMiddleware = (
   initializer: StateCreator<AuthStore, [["zustand/persist", unknown]], []>
 ) =>
   persist(initializer, {
     name: LocalStorageKeys.AUTH,
     onRehydrateStorage: () => async (state) => {
-      if (state && state.type)
-        try {
-          await state.verifyToken();
-        } catch (verifyError) {
-          try {
-            await state.logout();
-          } catch (logoutError) {}
-        }
+      if (state && state.type && !(await state.verifyToken()) && !(await state.logout()))
+        state.reset();
       return state;
     },
   });
@@ -106,5 +82,24 @@ export const useAuthStore = create<AuthStore>()(
             : ({} as ReturnType<typeof tokenVerification>),
         (auth, type, _data) => [auth, type]
       ),
+  }))
+);
+
+const __userStoreMiddleware = (
+  initializer: StateCreator<UserStore, [["zustand/persist", unknown]], []>
+) => persist(initializer, { name: LocalStorageKeys.USER });
+
+// TODO: Mover las funciones de getUserDetails a un nuevo fichero
+export const useUserStore = create<UserStore>()(
+  __userStoreMiddleware((set) => ({
+    user: inicialUser,
+    setUser: (user) => set({ user }),
+    fetchUserDetails: async () => {
+      const userResponse = await loadAbortable(getUserDetails());
+      if (!userResponse || userResponse instanceof Error) return false;
+      set({ user: UserAdapter.toUser(userResponse.data) });
+      return true;
+    },
+    reset: () => set({ user: inicialUser }),
   }))
 );

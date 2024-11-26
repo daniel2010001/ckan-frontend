@@ -1,5 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import { Link, useNavigate } from "react-router-dom";
 import { z } from "zod";
 
 import {
@@ -12,11 +13,21 @@ import {
   FormLabel,
   FormMessage,
   Input,
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+  buttonVariants,
 } from "@/components/ui";
 import { useAuthStore, useUserStore } from "@/hooks";
 import { AuthType, BaseRoutes } from "@/models";
 import { extractDefaultValues } from "@/utils";
-import { useNavigate } from "react-router-dom";
+
+import loginBackground from "@/assets/images/login-background.png";
+import { Loader2 } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 const LoginSchema = z.object({
   username: z
@@ -51,78 +62,108 @@ export function Login() {
     if (!(await login({ ...data, authType }))) return;
     if (await fetchUserDetails())
       return navigate(BaseRoutes.HOME, { replace: true, relative: "route" });
-    if (!(await logout())) reset();
+    else if (!(await logout())) reset();
   };
 
   return (
-    <div className="bg-custom-primary-2 w-full h-full flex flex-col items-center justify-center">
-      <div className="bg-white p-6 border-2 rounded-lg">
-        <div className="font-medium mb-6 mx-auto text-custom-secondary-2 flex flex-col items-center justify-center">
-          <h1 className="text-2xl border-0 border-b-2 border-custom-secondary-2">COCHABAMBA</h1>
-          <h2 className="text-xl">Datos Abiertos</h2>
-        </div>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)}>
-            <FormField
-              control={form.control}
-              name="username"
-              render={({ field }) => (
-                <FormItem className="mb-4">
-                  {/* <FormLabel className="text-xl">Username</FormLabel> */}
-                  <FormControl>
-                    <Input
-                      {...field}
-                      className="border-0 border-b-2 rounded-none focus:rounded-lg font-poppins pb-0"
-                      type="text"
-                      placeholder="Nombre de usuario"
-                    />
-                  </FormControl>
-                  <FormMessage className="font-poppins" />
-                </FormItem>
-              )}
-            />
+    <div className="w-full h-full grid grid-cols-2">
+      <div className="col-span-1 flex flex-col items-center justify-center bg-custom-primary-2">
+        <Card className="bg-white">
+          <CardHeader className="w-[400px]">
+            <CardTitle className="font-medium text-custom-secondary-2 flex flex-col items-center justify-center">
+              <h1 className="text-3xl border-0 border-b-2 border-custom-secondary-2">COCHABAMBA</h1>
+              <h2 className="text-2xl">Datos Abiertos</h2>
+            </CardTitle>
+            <CardDescription>
+              Si ya tienes una cuenta, ingresa con tu nombre de usuario y contraseña. Si no tienes
+              una cuenta,{" "}
+              <Link
+                className={cn(buttonVariants({ variant: "link" }), "p-0 h-4")}
+                to={BaseRoutes.REGISTER}
+              >
+                regístrate aqu&iacute;
+              </Link>
+              .
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Form {...form}>
+              <form>
+                <FormField
+                  control={form.control}
+                  name="username"
+                  render={({ field }) => (
+                    <FormItem className="mb-4">
+                      {/* <FormLabel className="text-xl">Username</FormLabel> */}
+                      <FormControl>
+                        <Input
+                          {...field}
+                          className="border-0 border-b-2 rounded-none focus:rounded-lg font-poppins pb-0"
+                          type="text"
+                          placeholder="Nombre de usuario"
+                        />
+                      </FormControl>
+                      <FormMessage className="font-poppins" />
+                    </FormItem>
+                  )}
+                />
 
-            <FormField
-              control={form.control}
-              name="password"
-              render={({ field }) => (
-                <FormItem className="mb-4">
-                  {/* <FormLabel className="text-xl">Password</FormLabel> */}
-                  <FormControl>
-                    <Input
-                      {...field}
-                      className="border-0 border-b-2 rounded-none focus:rounded-lg font-poppins pb-0"
-                      type="password"
-                      placeholder="Contraseña"
-                    />
-                  </FormControl>
-                  <FormMessage className="font-poppins" />
-                </FormItem>
-              )}
-            />
+                <FormField
+                  control={form.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem className="mb-4">
+                      {/* <FormLabel className="text-xl">Password</FormLabel> */}
+                      <FormControl>
+                        <Input
+                          {...field}
+                          className="border-0 border-b-2 rounded-none focus:rounded-lg font-poppins pb-0"
+                          type="password"
+                          placeholder="Contraseña"
+                        />
+                      </FormControl>
+                      <FormMessage className="font-poppins" />
+                    </FormItem>
+                  )}
+                />
 
-            <FormField
-              control={form.control}
-              name="remember"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="me-4">Remember {field.value ? "Yes" : "No"}</FormLabel>
-                  <FormControl>
-                    <Checkbox checked={field.value} onCheckedChange={field.onChange} />
-                  </FormControl>
-                  <FormMessage className="font-poppins" />
-                </FormItem>
-              )}
-            />
-
+                <FormField
+                  control={form.control}
+                  name="remember"
+                  render={({ field }) => (
+                    <FormItem className="w-full flex items-center justify-start gap-4">
+                      <FormControl>
+                        <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                      </FormControl>
+                      <FormLabel>Mantener ses&iacute;on iniciada?</FormLabel>
+                      <FormMessage className="font-poppins" />
+                    </FormItem>
+                  )}
+                />
+              </form>
+            </Form>
+          </CardContent>
+          <CardFooter className="flex flex-col justify-start">
             <Button
-              className="w-full mt-6 bg-custom-primary-2 hover:bg-custom-secondary-2"
-              type="submit"
+              className="w-full bg-custom-primary-2 hover:bg-custom-secondary-2"
+              disabled={form.formState.isSubmitting}
+              onClick={form.handleSubmit(onSubmit)}
             >
-              Ingresar
+              {form.formState.isSubmitting ? (
+                <>
+                  <Loader2 className="animate-spin" />
+                  Cargando...
+                </>
+              ) : (
+                "Ingresar"
+              )}
             </Button>
-          </form>
-        </Form>
+          </CardFooter>
+        </Card>
+      </div>
+      <div className="max-h-full col-span-1 overflow-hidden relative">
+        <div className="bg-custom-primary-2/30 w-full h-full absolute top-0 left-0" />
+        <img src={loginBackground} alt="Login background" />
       </div>
     </div>
   );

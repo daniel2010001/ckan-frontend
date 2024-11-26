@@ -1,4 +1,4 @@
-import axios, { AxiosRequestConfig, Method } from "axios";
+import axios, { AxiosRequestConfig, isAxiosError, Method } from "axios";
 
 import { AxiosCall, codeMatcher } from "@/models";
 
@@ -10,9 +10,15 @@ export async function loadAbortable<T = unknown, D = undefined>({
   call,
   controller,
 }: AxiosCall<T, D>) {
-  const value = await call?.catch((error) => error);
-  controller?.abort();
-  return value;
+  let value: Awaited<AxiosCall<T, D>["call"]>;
+  try {
+    value = await call;
+    controller?.abort();
+    return value;
+  } catch (e) {
+    if (isAxiosError<T, D>(e)) value = e;
+    else return;
+  }
 }
 
 export function createAxiosCall<T = unknown, D = undefined>(

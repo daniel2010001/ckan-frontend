@@ -32,10 +32,15 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@radix-ui/react-avatar";
 import { useAuthStore } from "@/hooks";
 import { BaseRoutes } from "@/models";
+import { useNavigate } from "react-router-dom";
 
 export function AccountButton() {
-  const { logout } = useAuthStore();
-  const onLogout = () => logout().then(() => (window.location.href = BaseRoutes.HOME));
+  const { logout, reset } = useAuthStore();
+  const navigate = useNavigate();
+  const onLogout = async () =>
+    await logout()
+      .then((bool) => !bool && reset())
+      .finally(() => navigate(BaseRoutes.HOME, { replace: true, relative: "route" }));
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
@@ -43,7 +48,7 @@ export function AccountButton() {
         className="flex h-11 w-11 items-center justify-center rounded-full overflow-hidden p-0"
       >
         <Avatar>
-          {/* <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" /> */}
+          {<AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />}
           <AvatarFallback>CN</AvatarFallback>
         </Avatar>
       </DropdownMenuTrigger>
