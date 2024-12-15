@@ -1,5 +1,8 @@
-import { Dataset, DatasetResponse } from "@/models";
-import { OrganizationAdapter, ResourceAdapter } from ".";
+import { Dataset, DatasetResponse } from "@/models/ckan";
+import { OrganizationAdapter } from "./organization.adapter";
+import { ResourceAdapter } from "./resource.adapter";
+import { StateAdapter } from "./state.adapter";
+import { TagAdapter } from "./tag.adapter";
 
 /** Adapter for Dataset */
 export class DatasetAdapter {
@@ -22,68 +25,27 @@ export class DatasetAdapter {
       licenseTitle: datasetResponse.license_title,
       maintainer: datasetResponse.maintainer,
       maintainerEmail: datasetResponse.maintainer_email,
-      metadataCreated: datasetResponse.metadata_created,
-      metadataModified: datasetResponse.metadata_modified,
-      name: datasetResponse.name,
-      notes: datasetResponse.notes,
+      created: new Date(datasetResponse.metadata_created),
+      modified: new Date(datasetResponse.metadata_modified),
+      url: datasetResponse.name,
+      description: datasetResponse.notes,
       numResources: datasetResponse.num_resources,
       numTags: datasetResponse.num_tags,
       organization: OrganizationAdapter.toOrganization(datasetResponse.organization),
       ownerOrg: datasetResponse.owner_org,
       private: datasetResponse.private,
-      state: datasetResponse.state,
+      isActive: StateAdapter.isActive(datasetResponse.state),
       title: datasetResponse.title,
       type: datasetResponse.type,
-      url: datasetResponse.url,
+      source: datasetResponse.url,
       version: datasetResponse.version,
-      resources: datasetResponse.resources.map((resource) => ResourceAdapter.toResource(resource)),
+      resources: datasetResponse.resources
+        .map((resource) => ResourceAdapter.toResource(resource))
+        .sort((a, b) => a.position - b.position),
       extras: datasetResponse.extras,
-      tags: datasetResponse.tags,
+      tags: datasetResponse.tags.map((item) => TagAdapter.toTag(item)),
       groups: datasetResponse.groups,
-      relationshipsAsSubject: datasetResponse.relationships_as_subject,
-      relationshipsAsObject: datasetResponse.relationships_as_object,
-    };
-  }
-
-  /**
-   * Converts a Dataset to a DatasetResponse
-   * @param dataset Dataset to convert
-   * @returns DatasetResponse
-   *
-   * @example
-   * const datasetResponse = DatasetAdapter.toDatasetResponse(dataset);
-   */
-  public static toDatasetResponse(dataset: Dataset): DatasetResponse {
-    return {
-      author: dataset.author,
-      author_email: dataset.authorEmail,
-      creator_user_id: dataset.creatorUserId,
-      id: dataset.id,
-      isopen: dataset.isOpen,
-      license_id: dataset.licenseId,
-      license_title: dataset.licenseTitle,
-      maintainer: dataset.maintainer,
-      maintainer_email: dataset.maintainerEmail,
-      metadata_created: dataset.metadataCreated,
-      metadata_modified: dataset.metadataModified,
-      name: dataset.name,
-      notes: dataset.notes,
-      num_resources: dataset.numResources,
-      num_tags: dataset.numTags,
-      organization: OrganizationAdapter.toOrganizationResponse(dataset.organization),
-      owner_org: dataset.ownerOrg,
-      private: dataset.private,
-      state: dataset.state,
-      title: dataset.title,
-      type: dataset.type,
-      url: dataset.url,
-      version: dataset.version,
-      resources: dataset.resources.map((resource) => ResourceAdapter.toResourceResponse(resource)),
-      extras: dataset.extras,
-      tags: dataset.tags,
-      groups: dataset.groups,
-      relationships_as_subject: dataset.relationshipsAsSubject,
-      relationships_as_object: dataset.relationshipsAsObject,
+      category: datasetResponse.extras.find((item) => item.key === "category")?.value,
     };
   }
 }

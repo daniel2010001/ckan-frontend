@@ -1,9 +1,12 @@
 import { Link } from "react-router-dom";
 
 import { Footer } from "@/components/layouts";
-import { Background, Button, buttonVariants, Input, Separator } from "@/components/ui/";
+import { Background } from "@/components/ui/background";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
-import { DatasetRoutes } from "@/models";
+import { DatasetRoutes, Notice } from "@/models";
 
 import callCenterData from "@/assets/icons/call-center-data.svg";
 import environment from "@/assets/icons/environment.svg";
@@ -17,6 +20,11 @@ import update from "@/assets/icons/update.svg";
 import urbanMobility from "@/assets/icons/urban-mobility.svg";
 import noticias from "@/assets/images/noticias.png";
 import { Search } from "lucide-react";
+import { NoticesCarousel } from "./components";
+import { useState } from "react";
+import { useEffectAsync, useFetchAndLoader } from "@/hooks";
+import { lastNotices } from "@/services";
+import { NoticeAdapter } from "@/adapters";
 
 const description =
   "Cochabamba Open Data es una plataforma digital que proporciona acceso libre a los datos públicos generados por la Alcaldía de Cochabamba. Este portal permite a ciudadanos, investigadores, empresas y desarrolladores explorar, descargar y utilizar conjuntos de datos en diferentes áreas. Su objetivo es fomentar la transparencia, impulsar la innovación y apoyar la toma de decisiones informadas, promoviendo así el desarrollo de aplicaciones y soluciones que beneficien a la comunidad de Cochabamba.";
@@ -51,14 +59,23 @@ const orderBy: Array<{ text: string; icon: string; sortBy: string }> = [
 ];
 
 export function Home() {
+  const [notices, setNotices] = useState<Array<Notice>>([]);
+
+  const { callEndpoint: loadNotices } = useFetchAndLoader(useState);
+
+  useEffectAsync({
+    asyncFunction: async () => await loadNotices(lastNotices()),
+    successFunction: (data) => setNotices(data.map(NoticeAdapter.toNotice)),
+  });
+
   return (
     <div className="flex flex-col items-center justify-center">
       {/* Title */}
       <Background>
         <div className="flex flex-col items-center justify-center px-24 py-12 text-center">
-          <div className="font-medium mb-6">
+          <div className="font-medium mb-6 font-arciform">
             <h1 className="text-6xl border-0 border-b-2 border-white">COCHABAMBA</h1>
-            <h2 className="text-3xl mt-2">Datos Abiertos</h2>
+            <h2 className="text-3xl mt-2">DATOS ABIERTOS</h2>
           </div>
           <div className="relative w-1/2 flex items-center justify-center text-black">
             <Input type="text" placeholder="Buscar datasets..." className="rounded-full bg-white" />
@@ -71,7 +88,7 @@ export function Home() {
               <Search />
             </Button>
           </div>
-          <p className="font-poppins mt-4 text-xl">{description}</p>
+          <p className="font-poppins mt-4 text-lg">{description}</p>
         </div>
       </Background>
 
@@ -133,15 +150,21 @@ export function Home() {
         </div>
 
         {/* News */}
-        <div className="col-span-1 flex flex-col items-center justify-center px-24 pb-12 text-center">
+        <div className="col-span-1 flex flex-col items-center justify-center px-12 pb-12 text-center">
           <h1 className="text-2xl mb-4 text-custom-secondary-2">
             SECCI&Oacute;N DE &Uacute;LTIMAS NOTICIAS Y ACTUALIDADES
           </h1>
-          <img src={noticias} alt="Noticias" className="w-full mb-4" />
-          <p className="font-poppins text-base">
-            Un espacio donde se publiquen novedades sobre actualizaciones de datos o proyectos
-            relacionados con la plataforma.
-          </p>
+          {notices.length ? (
+            <NoticesCarousel notices={notices} />
+          ) : (
+            <>
+              <img src={noticias} alt="Noticias" className="w-full mb-4" />
+              <p className="font-poppins text-base">
+                Un espacio donde se publiquen novedades sobre actualizaciones de datos o proyectos
+                relacionados con la plataforma.
+              </p>
+            </>
+          )}
         </div>
       </div>
 

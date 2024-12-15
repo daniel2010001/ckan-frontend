@@ -1,4 +1,5 @@
-import { OrganizationResponse, Organization } from "@/models";
+import { OrganizationResponse, Organization } from "@/models/ckan";
+import { StateAdapter } from "./state.adapter";
 
 /** Adapter for Organization */
 export class OrganizationAdapter {
@@ -21,30 +22,7 @@ export class OrganizationAdapter {
       created: organizationResponse.created,
       isOrganization: organizationResponse.is_organization,
       approvalStatus: organizationResponse.approval_status,
-      state: organizationResponse.state,
-    };
-  }
-
-  /**
-   * Converts an Organization to an OrganizationResponse
-   * @param organization Organization to convert
-   * @returns OrganizationResponse
-   *
-   * @example
-   * const organizationResponse = OrganizationAdapter.toOrganizationResponse(organization);
-   */
-  public static toOrganizationResponse(organization: Organization): OrganizationResponse {
-    return {
-      id: organization.id,
-      name: organization.name,
-      title: organization.title,
-      type: organization.type,
-      description: organization.description,
-      image_url: organization.imageUrl,
-      created: organization.created,
-      is_organization: organization.isOrganization,
-      approval_status: organization.approvalStatus,
-      state: organization.state,
+      isActive: StateAdapter.isActive(organizationResponse.state),
     };
   }
 }

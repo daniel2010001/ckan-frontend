@@ -30,12 +30,56 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@radix-ui/react-avatar";
-import { useAuthStore } from "@/hooks";
+import { useAuthStore, useUserStore } from "@/hooks";
 import { BaseRoutes } from "@/models";
 import { useNavigate } from "react-router-dom";
+import { Fragment } from "react/jsx-runtime";
+
+type AccountLinkItem = {
+  icon: React.ReactNode;
+  label: string;
+  shortcut?: string;
+  href?: string;
+};
+
+type AccountDropdownItem = {
+  icon: React.ReactNode;
+  label: string;
+  items: Array<Array<AccountLinkItem>>;
+};
+
+const accountItems: Array<Array<AccountLinkItem | AccountDropdownItem>> = [
+  [
+    { icon: <User />, label: "Profile", shortcut: "⇧⌘P" },
+    { icon: <CreditCard />, label: "Billing", shortcut: "⌘B" },
+    { icon: <Settings />, label: "Settings", shortcut: "⌘S" },
+    { icon: <Keyboard />, label: "Keyboard shortcuts", shortcut: "⌘K" },
+  ],
+  [
+    { icon: <Users />, label: "Team" },
+    {
+      icon: <UserPlus />,
+      label: "Invite users",
+      items: [
+        [
+          { icon: <Mail />, label: "Email" },
+          { icon: <MessageSquare />, label: "Message" },
+        ],
+        [{ icon: <PlusCircle />, label: "More..." }],
+      ],
+    },
+    { icon: <Plus />, label: "New Team", shortcut: "⌘+T" },
+  ],
+  [
+    { icon: <Github />, label: "GitHub" },
+    { icon: <LifeBuoy />, label: "Support" },
+    { icon: <Cloud />, label: "API" },
+  ],
+];
 
 export function AccountButton() {
   const { logout, reset } = useAuthStore();
+  const { user } = useUserStore();
   const navigate = useNavigate();
   const onLogout = async () =>
     await logout()
@@ -48,88 +92,63 @@ export function AccountButton() {
         className="flex h-11 w-11 items-center justify-center rounded-full overflow-hidden p-0"
       >
         <Avatar>
-          {<AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />}
-          <AvatarFallback>CN</AvatarFallback>
+          {user.imageDisplayUrl && (
+            <AvatarImage src={user.imageDisplayUrl} alt={user.displayName} />
+          )}
+          <AvatarFallback>A</AvatarFallback>
         </Avatar>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56">
-        <DropdownMenuLabel>My Account</DropdownMenuLabel>
+        <DropdownMenuLabel>
+          <div className="flex flex-col space-y-1">
+            <p className="text-sm font-medium leading-none">{user.displayName}</p>
+            <p className="text-xs leading-none text-muted-foreground">{user.email}</p>
+          </div>
+        </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuGroup>
-          <DropdownMenuItem>
-            <User />
-            <span>Profile</span>
-            <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
-          </DropdownMenuItem>
-          <DropdownMenuItem>
-            <CreditCard />
-            <span>Billing</span>
-            <DropdownMenuShortcut>⌘B</DropdownMenuShortcut>
-          </DropdownMenuItem>
-          <DropdownMenuItem>
-            <Settings />
-            <span>Settings</span>
-            <DropdownMenuShortcut>⌘S</DropdownMenuShortcut>
-          </DropdownMenuItem>
-          <DropdownMenuItem>
-            <Keyboard />
-            <span>Keyboard shortcuts</span>
-            <DropdownMenuShortcut>⌘K</DropdownMenuShortcut>
-          </DropdownMenuItem>
-        </DropdownMenuGroup>
-        <DropdownMenuSeparator />
-        <DropdownMenuGroup>
-          <DropdownMenuItem>
-            <Users />
-            <span>Team</span>
-          </DropdownMenuItem>
-          <DropdownMenuSub>
-            <DropdownMenuSubTrigger>
-              <UserPlus />
-              <span>Invite users</span>
-            </DropdownMenuSubTrigger>
-            <DropdownMenuPortal>
-              <DropdownMenuSubContent>
-                <DropdownMenuItem>
-                  <Mail />
-                  <span>Email</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <MessageSquare />
-                  <span>Message</span>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem>
-                  <PlusCircle />
-                  <span>More...</span>
-                </DropdownMenuItem>
-              </DropdownMenuSubContent>
-            </DropdownMenuPortal>
-          </DropdownMenuSub>
-          <DropdownMenuItem>
-            <Plus />
-            <span>New Team</span>
-            <DropdownMenuShortcut>⌘+T</DropdownMenuShortcut>
-          </DropdownMenuItem>
-        </DropdownMenuGroup>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem>
-          <Github />
-          <span>GitHub</span>
-        </DropdownMenuItem>
-        <DropdownMenuItem>
-          <LifeBuoy />
-          <span>Support</span>
-        </DropdownMenuItem>
-        <DropdownMenuItem disabled>
-          <Cloud />
-          <span>API</span>
-        </DropdownMenuItem>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={onLogout}>
+        {accountItems.map((itemLv1, indexLv1) => (
+          <Fragment key={`group-${indexLv1}`}>
+            <DropdownMenuGroup>
+              {itemLv1.map((itemLv2, indexLv2) =>
+                "items" in itemLv2 ? (
+                  <DropdownMenuSub key={`dropdown-${indexLv2}`}>
+                    <DropdownMenuSubTrigger>
+                      {itemLv2.icon}
+                      <span>{itemLv2.label}</span>
+                    </DropdownMenuSubTrigger>
+                    <DropdownMenuPortal>
+                      <DropdownMenuSubContent>
+                        {itemLv2.items.map((itemLv3, indexLv3) => (
+                          <Fragment key={`dropdown-${indexLv2}-group-${indexLv3}`}>
+                            {itemLv3.map((itemLv4, indexLv4) => (
+                              <DropdownMenuItem key={`dropdown-${indexLv2}-item-${indexLv4}`}>
+                                <span>{itemLv4.label}</span>
+                              </DropdownMenuItem>
+                            ))}
+                            {itemLv2.items.length - 1 > indexLv3 && <DropdownMenuSeparator />}
+                          </Fragment>
+                        ))}
+                      </DropdownMenuSubContent>
+                    </DropdownMenuPortal>
+                  </DropdownMenuSub>
+                ) : (
+                  <DropdownMenuItem key={`item-${indexLv2}`}>
+                    {itemLv2.icon}
+                    <span>{itemLv2.label}</span>
+                    {itemLv2.shortcut && (
+                      <DropdownMenuShortcut>{itemLv2.shortcut}</DropdownMenuShortcut>
+                    )}
+                  </DropdownMenuItem>
+                )
+              )}
+            </DropdownMenuGroup>
+            <DropdownMenuSeparator />
+          </Fragment>
+        ))}
+        <DropdownMenuItem onClick={onLogout} key="logout">
           <LogOut />
           <span>Log out</span>
-          <DropdownMenuShortcut>⇧⌘Q</DropdownMenuShortcut>
+          <DropdownMenuShortcut>⇧⌘L</DropdownMenuShortcut>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

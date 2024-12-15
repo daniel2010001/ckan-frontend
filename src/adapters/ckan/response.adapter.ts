@@ -2,11 +2,11 @@ import { CKANResponse, CKANResponseError } from "@/models/ckan";
 
 export class ResponseAdapter {
   static isResponse<T>(response: any): response is CKANResponse<T> {
-    return (response as CKANResponse<T>).success !== undefined;
+    return (response as CKANResponse<T>)?.success !== undefined;
   }
 
   static isError<T>(response: any): response is CKANResponseError<T> {
-    return !(response as CKANResponse<T>).success;
+    return (response as CKANResponse<T>)?.success === false;
   }
 
   static toResponse<T>(response: any): T {

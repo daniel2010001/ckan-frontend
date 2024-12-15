@@ -25,11 +25,10 @@ export class AuthAdapter {
   }
 
   static toAPartialAuth(authResponse: any): Partial<Auth> {
-    console.log(authResponse);
     const auth: Partial<Auth> = {};
+    if (AuthAdapter.isSliding(authResponse)) auth.accessToken = authResponse.token;
     if (AuthAdapter.isAccess(authResponse)) auth.accessToken = authResponse.access;
     if (AuthAdapter.isRefresh(authResponse)) auth.refreshToken = authResponse.refresh;
-    if (AuthAdapter.isSliding(authResponse)) auth.accessToken = authResponse.token;
     return auth;
   }
 

@@ -14,11 +14,11 @@ export async function loadAbortable<T = unknown, D = undefined>({
   try {
     value = await call;
     controller?.abort();
-    return value;
   } catch (e) {
     if (isAxiosError<T, D>(e)) value = e;
     else return;
   }
+  return value;
 }
 
 export function createAxiosCall<T = unknown, D = undefined>(
@@ -32,8 +32,9 @@ export function createAxiosCall<T = unknown, D = undefined>(
     method,
     url,
     data,
-    ...config,
+    baseURL: import.meta.env.VITE_BACKEND,
     signal: controller.signal,
+    ...config,
   });
   return { call, controller };
 }
@@ -43,7 +44,7 @@ export function createAxiosCall<T = unknown, D = undefined>(
  * @param code Código de error
  * @returns Mensaje de error personalizado
  */
-export function getCustomError(code: string): string {
+export function getCustomErrorCode(code: string): string {
   const response = codeMatcher[code];
   if (!response) console.log(code);
   return codeMatcher[code] || codeMatcher.ERR_UNKNOWN;

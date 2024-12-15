@@ -1,3 +1,5 @@
+import { State } from ".";
+
 /** Interface for Organization for the backend */
 export interface OrganizationResponse {
   id: string;
@@ -9,7 +11,7 @@ export interface OrganizationResponse {
   created: string;
   is_organization: boolean;
   approval_status: string;
-  state: string;
+  state: State;
 }
 
 /** Interface for Organization for the frontend */
@@ -23,5 +25,5 @@ export interface Organization {
   created: string;
   isOrganization: boolean;
   approvalStatus: string;
-  state: string;
+  isActive: boolean;
 }

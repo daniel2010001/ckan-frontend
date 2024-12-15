@@ -1,5 +1,5 @@
 import { AxiosCall } from "@/models";
-import { useEffectAfterMount } from ".";
+import { useEffect } from "react";
 
 /**
  * Función para realizar llamadas a una API y manejar el estado de carga
@@ -11,7 +11,7 @@ export const useFetchAndLoader = (
     initialState: boolean
   ) => [boolean, (value: boolean | ((prevState: boolean) => boolean)) => void]
 ) => {
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   let controller: AbortController;
 
   /**
@@ -33,7 +33,7 @@ export const useFetchAndLoader = (
     if (controller) controller.abort();
   };
 
-  useEffectAfterMount(() => cancelRequest(), []);
+  useEffect(() => cancelRequest(), []);
 
   return { loading, callEndpoint };
 };

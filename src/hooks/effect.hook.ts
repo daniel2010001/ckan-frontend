@@ -45,7 +45,7 @@ export const useEffectAsync = <T, D = any>({
   returnFunction = () => {},
   deps = [],
 }: useEffectAsyncProps<T, D>) => {
-  useEffectAfterMount(() => {
+  useEffect(() => {
     let isActive = true;
     asyncFunction()
       .then((result) => {

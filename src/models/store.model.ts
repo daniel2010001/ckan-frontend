@@ -25,7 +25,11 @@ export interface AuthStore {
     axiosCallGenerator: (auth: Auth, type: AuthType) => AxiosCall<T, D>,
     newValueGenerator: (auth: Auth, type: AuthType, data?: T) => [Auth, AuthType]
   ) => Promise<boolean>;
-  login: (props: { username: string; password: string; authType: AuthType }) => Promise<boolean>;
+  login: (props: {
+    username: string;
+    password: string;
+    authType: NonNullable<AuthType>;
+  }) => Promise<boolean>;
   logout: () => Promise<boolean>;
   refreshAccessToken: () => Promise<boolean>;
   verifyToken: () => Promise<boolean>;

@@ -1,16 +1,16 @@
 import axios, { AxiosResponse, InternalAxiosRequestConfig, isAxiosError } from "axios";
+import { toast } from "sonner";
 
 import { ResponseAdapter } from "@/adapters/ckan";
 import { useAuthStore } from "@/hooks";
-import { BaseRoutes } from "@/models";
-import { getCustomError } from "@/utils";
+import { ComponentError, getCustomErrorCode } from "@/utils";
 
 /** Interceptor para la autenticación */
 export const AxiosInterceptor = () => {
   const updateHeader = (request: InternalAxiosRequestConfig) => {
     const { auth, type } = useAuthStore.getState();
-    request.headers["Content-Type"] = "application/json";
     if (type) request.headers.Authorization = `Bearer ${auth.accessToken}`;
+    if (!request.headers["Content-Type"]) request.headers["Content-Type"] = "application/json";
     return request;
   };
 
@@ -30,18 +30,23 @@ export const AxiosInterceptor = () => {
     },
     async (error: any) => {
       if (isAxiosError(error) && error.code) {
-        const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
-        if (originalRequest && !originalRequest._retry && !originalRequest.url?.includes("refresh"))
-          if (error.response?.data?.success === false)
-            console.log("Error request", error.response.data.error);
-          else if (error.response?.status === 401) {
-            originalRequest._retry = true;
+        const request = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
+        if (request && !request._retry && !request.url?.includes("refresh"))
+          if (ResponseAdapter.isError(error.response?.data)) {
+            toast.error("Error en la petición: ", {
+              description: () => ComponentError(error.response?.data.error),
+            });
+          } else if (error.response?.status === 401) {
+            request._retry = true;
             const { type, logout, refreshAccessToken, reset } = useAuthStore.getState();
-            if (type) {
-              if (await refreshAccessToken()) return await axios(originalRequest);
+            if (type)
+              if (await refreshAccessToken()) return await axios(request);
               else if (!(await logout())) reset(); // sesión expirada
-            } else window.location.href = BaseRoutes.LOGIN;
-          } else if (!originalRequest?.signal?.aborted) console.log(getCustomError(error.code));
+          } else if (!request?.signal?.aborted) {
+            toast.error("Ah ocurrido un error inesperado!", {
+              description: getCustomErrorCode(error.code),
+            });
+          }
       } else console.error("Error Interceptor", error);
       return Promise.reject(error);
     }

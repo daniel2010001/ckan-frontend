@@ -3,31 +3,33 @@ import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
 import { z } from "zod";
 
+import { Button, buttonVariants } from "@/components/ui/button";
 import {
-  Button,
-  Checkbox,
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-  Input,
   Card,
   CardContent,
   CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
-  buttonVariants,
-} from "@/components/ui";
+} from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 import { useAuthStore, useUserStore } from "@/hooks";
+import { cn } from "@/lib/utils";
 import { AuthType, BaseRoutes } from "@/models";
 import { extractDefaultValues } from "@/utils";
 
 import loginBackground from "@/assets/images/login-background.png";
 import { Loader2 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 const LoginSchema = z.object({
   username: z
@@ -59,20 +61,26 @@ export function Login() {
 
   const onSubmit = async (data: z.infer<typeof LoginSchema>) => {
     const authType: AuthType = data.remember ? AuthType.ACCESS_AND_REFRESH : AuthType.TOKEN;
-    if (!(await login({ ...data, authType }))) return;
-    if (await fetchUserDetails())
-      return navigate(BaseRoutes.HOME, { replace: true, relative: "route" });
-    else if (!(await logout())) reset();
+    if (!(await login({ ...data, authType }))) {
+      toast.error("Error al iniciar sesión");
+      return;
+    }
+    if (await fetchUserDetails()) {
+      toast.success("Sesión iniciada correctamente");
+      navigate(BaseRoutes.HOME, { replace: true, relative: "route" });
+    } else if (!(await logout())) reset();
   };
 
   return (
     <div className="w-full h-full grid grid-cols-2">
-      <div className="col-span-1 flex flex-col items-center justify-center bg-custom-primary-2">
+      <div className="col-span-1 flex flex-col items-center justify-center bg-rose-800/80">
         <Card className="bg-white">
           <CardHeader className="w-[400px]">
-            <CardTitle className="font-medium text-custom-secondary-2 flex flex-col items-center justify-center">
-              <h1 className="text-3xl border-0 border-b-2 border-custom-secondary-2">COCHABAMBA</h1>
-              <h2 className="text-2xl">Datos Abiertos</h2>
+            <CardTitle className="font-medium text-custom-secondary-2 flex flex-col items-center justify-center font-arciform">
+              <h1 className="text-3xl border-0 border-b-[1px] border-custom-secondary-2 h-8">
+                COCHABAMBA
+              </h1>
+              <h2 className="text-lg tracking-wider">DATOS ABIERTOS</h2>
             </CardTitle>
             <CardDescription>
               Si ya tienes una cuenta, ingresa con tu nombre de usuario y contraseña. Si no tienes
@@ -161,6 +169,7 @@ export function Login() {
           </CardFooter>
         </Card>
       </div>
+
       <div className="max-h-full col-span-1 overflow-hidden relative">
         <div className="bg-custom-primary-2/30 w-full h-full absolute top-0 left-0" />
         <img src={loginBackground} alt="Login background" />
