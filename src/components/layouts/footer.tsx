@@ -1,11 +1,13 @@
 import { Link } from "react-router-dom";
 
-import { Background, buttonVariants, Separator } from "@/components/ui";
+import { Background } from "@/components/ui/background";
+import { buttonVariants } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
 
 import logoTransparent from "@/assets/images/logo_transparent.png";
+import { InstagramLogoIcon, TwitterLogoIcon } from "@radix-ui/react-icons";
 import { Facebook, HouseIcon, MapPin, Phone } from "lucide-react";
 import { ReactElement } from "react";
-import { InstagramLogoIcon, TwitterLogoIcon } from "@radix-ui/react-icons";
 
 const details: Array<{ icon: ReactElement; text: string }> = [
   {
@@ -31,8 +33,8 @@ const socials: Array<{ icon: ReactElement; link: string }> = [
 export function Footer() {
   return (
     <Background>
-      <div className="flex flex-col items-center justify-center">
-        <img src={logoTransparent} alt="logo" className="w-auto h-20" />
+      <div className="flex flex-col items-center justify-center max-h-28">
+        <img src={logoTransparent} alt="logo" className="w-auto h-60" />
       </div>
       <Separator className="mt-4" />
       <div className="flex items-center justify-between font-poppins overflow-clip px-8 py-4">

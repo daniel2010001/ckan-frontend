@@ -1,9 +1,26 @@
 import {
+  type Tag,
   type Organization,
   type OrganizationResponse,
   type Resource,
   type ResourceResponse,
-} from "..";
+  type TagResponse,
+  State,
+} from ".";
+
+export type Category =
+  | "económica"
+  | "social"
+  | "cultural"
+  | "demográfica"
+  | "sanitaria"
+  | "ciencia"
+  | "tecnológica";
+
+export type Extra = {
+  key: string;
+  value: string;
+};
 
 /** Interface for Dataset for the backend */
 export interface DatasetResponse {
@@ -25,14 +42,14 @@ export interface DatasetResponse {
   organization: OrganizationResponse;
   owner_org: string;
   private: boolean;
-  state: string;
+  state: State;
   title: string;
   type: string;
   url: string;
   version: string;
   resources: ResourceResponse[];
-  extras: any[];
-  tags: any[];
+  extras: Extra[];
+  tags: TagResponse[];
   groups: any[];
   relationships_as_subject: any[];
   relationships_as_object: any[];
@@ -49,24 +66,24 @@ export interface Dataset {
   licenseTitle: string;
   maintainer: string;
   maintainerEmail: string;
-  metadataCreated: string;
-  metadataModified: string;
-  name: string;
-  notes: string;
+  created: Date;
+  modified: Date;
+  url: string;
+  description: string;
   numResources: number;
   numTags: number;
   organization: Organization;
   ownerOrg: string;
   private: boolean;
-  state: string;
+  isActive: boolean;
   title: string;
   type: string;
-  url: string;
+  source: string;
   version: string;
   resources: Resource[];
-  extras: any[];
-  tags: any[];
+  extras: Extra[];
+  tags: Tag[];
   groups: any[];
-  relationshipsAsSubject: any[];
-  relationshipsAsObject: any[];
+  // extras: any[];
+  category?: string;
 }

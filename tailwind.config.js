@@ -4,6 +4,10 @@ export default {
   content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
   theme: {
     extend: {
+      animation: { heartbeat: "heartbeat 10s ease-in-out infinite" },
+      keyframes: {
+        heartbeat: { "0%, 100%": { transform: "scale(1)" }, "50%": { transform: "scale(1.1)" } },
+      },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
@@ -13,7 +17,7 @@ export default {
         custom: {
           primary: {
             1: "rgb(249, 177, 84)",
-            2: "rgb(234, 84, 124)",
+            2: "hsl(338, 80%, 62%)",
             3: "rgb(109, 86, 160)",
             4: "rgb(74, 193, 224)",
             5: "rgb(79, 185, 168)",
@@ -69,7 +73,14 @@ export default {
           5: "hsl(var(--chart-5))",
         },
       },
-      fontFamily: { arciform: ["Arciform", "sans-serif"], poppins: ["Poppins", "sans-serif"] },
+      fontFamily: {
+        arciform: ["Arciform", "sans-serif"],
+        poppins: ["Poppins", "sans-serif"],
+      },
+      spacing: {
+        "navbar-height": "4rem",
+        "-navbar-height": "calc(100vh - 4rem)",
+      },
     },
   },
   plugins: [require("tailwindcss-animate")],

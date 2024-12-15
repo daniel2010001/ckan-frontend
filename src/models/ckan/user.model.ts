@@ -1,3 +1,5 @@
+import { State } from ".";
+
 export interface UserResponse {
   id: string;
   name: string;
@@ -7,7 +9,7 @@ export interface UserResponse {
   last_active: string | null;
   activity_streams_email_notifications: boolean;
   sysadmin: boolean;
-  state: string;
+  state: State;
   image_url: string | null;
   display_name: string;
   email_hash: string;
@@ -26,7 +28,7 @@ export interface User {
   lastActive: string | null;
   activityStreamsEmailNotifications: boolean;
   sysadmin: boolean;
-  state: string;
+  isActive: boolean;
   imageUrl: string | null;
   displayName: string;
   emailHash: string;
@@ -34,4 +36,33 @@ export interface User {
   apiKey: string | null;
   email: string;
   imageDisplayUrl: string | null;
+}
+
+export const inicialUser: User = {
+  id: "",
+  name: "",
+  fullName: null,
+  created: "",
+  about: null,
+  lastActive: null,
+  activityStreamsEmailNotifications: false,
+  sysadmin: false,
+  isActive: false,
+  imageUrl: null,
+  displayName: "",
+  emailHash: "",
+  numberCreatedPackages: 0,
+  apiKey: null,
+  email: "",
+  imageDisplayUrl: null,
+};
+
+export interface UserRegister {
+  name: string;
+  email: string;
+  password: string;
+  fullname?: string;
+  about?: string;
+  image_url?: string;
+  profile_picture?: File;
 }

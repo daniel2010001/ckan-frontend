@@ -1,6 +1,19 @@
-import { User, UserResponse } from "@/models/ckan";
+import { User, UserRegister, UserResponse } from "@/models/ckan";
+import { StateAdapter } from "./state.adapter";
 
 export class UserAdapter {
+  static toUserRequest(user: any): UserRegister {
+    return {
+      name: user.username,
+      email: user.email,
+      password: user.password,
+      fullname: user.fullName,
+      about: user.about,
+      image_url: user.imageUrl,
+      profile_picture: user.profilePicture,
+    };
+  }
+
   static toUser(user: UserResponse): User {
     return {
       id: user.id,
@@ -11,7 +24,7 @@ export class UserAdapter {
       lastActive: user.last_active,
       activityStreamsEmailNotifications: user.activity_streams_email_notifications,
       sysadmin: user.sysadmin,
-      state: user.state,
+      isActive: StateAdapter.isActive(user.state),
       imageUrl: user.image_url,
       displayName: user.display_name,
       emailHash: user.email_hash,

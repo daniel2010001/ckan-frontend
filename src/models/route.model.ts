@@ -10,22 +10,27 @@ export enum BaseRoutes {
 }
 
 export const DatasetRoutes = {
-  BASE: (route: string = ""): string => `${BaseRoutes.DATASET}${route}`,
-  CATEGORY: "/category/:category",
-  TAG: "/tag/:tag",
-  DETAIL: "/detail/:id",
-  REGISTER: "/register",
-  RESOURCE: "/resource/:id",
+  BASE: (route: string = ""): string => `${BaseRoutes.DATASET}/${route}`,
+  REGISTER: "register",
+  MY_DATASETS: "my-datasets",
+  CATEGORY: "category/:category",
+  TAG: "tag/:name",
+  DETAIL: "detail/:url",
+  EDIT: "edit",
+  MANAGE: "manage",
+  RESOURCE: "resource/:id",
 } as const;
 
 export const GroupRoutes = {
-  BASE: (route: string = ""): string => `${BaseRoutes.GROUPS}${route}`,
-  DETAIL: "/detail/:id",
-  REGISTER: "/register",
+  BASE: (route: string = ""): string => `${BaseRoutes.GROUPS}/${route}`,
+  REGISTER: "register",
+  MANAGE: "manage/:name",
+  DETAIL: "detail/:name",
 } as const;
 
 export const OrganizationRoutes = {
-  BASE: (route: string = ""): string => `${BaseRoutes.ORGANIZATIONS}${route}`,
-  DETAIL: "/detail/:id",
-  REGISTER: "/register",
+  BASE: (route: string = ""): string => `${BaseRoutes.ORGANIZATIONS}/${route}`,
+  REGISTER: "register",
+  MANAGE: "manage/:name",
+  DETAIL: "detail/:name",
 } as const;
