@@ -2,7 +2,7 @@
 
 import {
   Bar,
-  BarChart,
+  BarChart as BarChartComponent,
   CartesianGrid,
   ReferenceLine,
   ResponsiveContainer,
@@ -14,14 +14,21 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useEffect, useRef } from "react";
 
+type DataGeneric = Record<string, string | number | boolean | Date>;
 interface BarChartProps {
-  data: Record<string, any>[];
+  data: DataGeneric[];
   xAxis: string;
   dataKeys: string[];
   totalBar?: boolean;
 }
 
-const CustomTooltip = ({ active, payload, label }: any) => {
+interface CustomTooltipProps {
+  active?: boolean;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  payload?: any;
+  label?: string;
+}
+const CustomTooltip = ({ active = false, payload, label = "" }: CustomTooltipProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -54,15 +61,17 @@ const CustomTooltip = ({ active, payload, label }: any) => {
           className="px-2 py-0 max-h-40 overflow-hidden overflow-y-auto"
         >
           <ul className="grid grid-cols-1">
-            {payload.map(({ name, value, color }: any) => (
-              <li key={name} className="flex flex-row items-center justify-start gap-2">
-                {/* un cuadro de color para cada elemento */}
-                <div className="w-2 h-2 rounded-full" style={{ backgroundColor: color }} />
-                <p className="font-poppins font-semibold" style={{ color }}>{`${
-                  name.split("-")[1] ?? name
-                }: ${value}`}</p>
-              </li>
-            ))}
+            {payload
+              .sort((a: { name: string }, b: { name: string }) => a.name.localeCompare(b.name))
+              .map(({ name, value, color }: { name: string; value: string; color: string }) => (
+                <li key={name} className="flex flex-row items-center justify-start gap-2">
+                  {/* un cuadro de color para cada elemento */}
+                  <div className="w-2 h-2 rounded-full" style={{ backgroundColor: color }} />
+                  <p className="font-poppins font-semibold" style={{ color }}>{`${
+                    name.split("-")[1] ?? name
+                  }: ${value}`}</p>
+                </li>
+              ))}
           </ul>
         </CardContent>
       </Card>
@@ -70,17 +79,13 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   }
   return null;
 };
-export const BarChartComponent: React.FC<BarChartProps> = ({
-  data,
-  xAxis,
-  dataKeys,
-  totalBar = true,
-}) => {
-  const dataGrouped: Array<{ name: string; _count: number } & Record<string, number>> = [];
+export const BarChart: React.FC<BarChartProps> = ({ data, xAxis, dataKeys, totalBar = true }) => {
+  type DataGroup = { name: string; _count: number } & Record<string, number>;
+  const dataGrouped: Array<DataGroup> = [];
   const bars = new Map<string, string>();
   // TODO: bug en el bars, cuando dos columnas tiene el mismo nombre el color tiene que ser el mismo
   data.forEach((item) => {
-    const key = item[xAxis];
+    const key = item[xAxis].toString();
     const index = dataGrouped.findIndex((group) => group.name === key);
     if (index === -1)
       dataGrouped.push({
@@ -90,7 +95,7 @@ export const BarChartComponent: React.FC<BarChartProps> = ({
           bars.set(`${key}-${item[key]}`, key);
           return { ...acc, [`${key}-${item[key]}`]: 1 };
         }, {}),
-      });
+      } as DataGroup);
     else {
       dataGrouped[index]._count = (dataGrouped[index]._count || 0) + 1;
       dataKeys.forEach((key) => {
@@ -100,9 +105,6 @@ export const BarChartComponent: React.FC<BarChartProps> = ({
       });
     }
   });
-
-  console.log(dataGrouped);
-
   return (
     <Card className="w-full max-w-4xl">
       <CardHeader>
@@ -110,7 +112,7 @@ export const BarChartComponent: React.FC<BarChartProps> = ({
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={400}>
-          <BarChart
+          <BarChartComponent
             data={dataGrouped.sort((a, b) => {
               if (typeof a.name === "number" && typeof b.name === "number") return a.name - b.name;
               return a.name.localeCompare(b.name);
@@ -137,11 +139,11 @@ export const BarChartComponent: React.FC<BarChartProps> = ({
               .map(([key, id], index) => (
                 <Bar key={key} dataKey={key} fill={`hsl(${index * 60}, 70%, 50%)`} stackId={id} />
               ))}
-          </BarChart>
+          </BarChartComponent>
         </ResponsiveContainer>
       </CardContent>
     </Card>
   );
 };
 
-export default BarChartComponent;
+export default BarChart;

@@ -107,7 +107,7 @@ export function AddResource({ package_id }: AddResourceProps) {
                   <FormControl>
                     <Textarea
                       {...field}
-                      value={field.value as any}
+                      value={field.value}
                       placeholder={"ej. Gastos anuales de la empresa"}
                       className="resize-none border-custom-gray"
                     />

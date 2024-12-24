@@ -1,6 +1,6 @@
-import { ColumnDef } from "@tanstack/react-table";
-import { useEffect, useState } from "react";
-import { Link, Navigate, useLocation, useNavigate, useParams } from "react-router-dom";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { useState } from "react";
+import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
 
 import { ResourceAdapter, ViewAdapter } from "@/adapters/ckan";
@@ -21,7 +21,7 @@ import { BaseRoutes } from "@/models";
 import { Resource as ResourceType, View, ViewType } from "@/models/ckan";
 import { getDatastore, getResource, getResourceViewList } from "@/services/ckan";
 import { convertFileSize, formatDate_DD_MMMM_YYYY } from "@/utils";
-import { BarChartComponent, ControlPanel, DataTable, getColumns } from "./components";
+import { BarChart, ControlPanel, DataTable, getColumns, DonutView } from "./components";
 
 import { ExternalLinkIcon, LinkIcon } from "lucide-react";
 
@@ -36,14 +36,14 @@ function DataTableView({ resourceId }: { resourceId: string }) {
   useEffectAsync({
     asyncFunction: async () => await loadDatastore(getDatastore(resourceId)),
     successFunction: ({ records, fields }) => {
-      setData(records.sort((a, b) => a._id - b._id));
+      console.log(fields, records);
+      setData(records.sort((a, b) => a._id - b._id).map(({ _id, ...item }) => item));
       setColumns(fields.filter((item) => item.id !== "_id").map((item) => item.id));
+      setSelectedXAxis(fields.filter((item) => item.id !== "_id")[0].id);
     },
     errorFunction: () => console.log("Error"),
     deps: [resourceId],
   });
-
-  useEffect(() => setSelectedXAxis(columns[0] ?? ""), [columns]);
 
   const handleXAxisChange = (value: string) => {
     setSelectedDataKeys((prev) => [...prev.filter((k) => k !== value)]);
@@ -61,6 +61,7 @@ function DataTableView({ resourceId }: { resourceId: string }) {
       <TabsList>
         <TabsTrigger value={"table"}>Tabla</TabsTrigger>
         <TabsTrigger value={"bar-chart"}>Gráfico de barras</TabsTrigger>
+        <TabsTrigger value={"donut-chart"}>Gráfico de Donut</TabsTrigger>
       </TabsList>
 
       {/* Dataset table */}
@@ -71,7 +72,7 @@ function DataTableView({ resourceId }: { resourceId: string }) {
       {/* Dataset details */}
       <TabsContent value={"bar-chart"} className="container mx-auto bg-transparent flex gap-4">
         {data.length > 0 && (
-          <BarChartComponent
+          <BarChart
             data={data}
             xAxis={selectedXAxis}
             dataKeys={selectedDataKeys}
@@ -87,6 +88,11 @@ function DataTableView({ resourceId }: { resourceId: string }) {
           onDataKeyChange={handleDataKeyChange}
           onTotalBarChange={handleTotalBarChange}
         />
+      </TabsContent>
+
+      {/* Pie chart */}
+      <TabsContent value="donut-chart" className="container mx-auto bg-transparent">
+        <DonutView data={data} />
       </TabsContent>
     </Tabs>
   );
