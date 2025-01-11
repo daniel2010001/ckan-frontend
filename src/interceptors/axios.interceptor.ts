@@ -28,7 +28,7 @@ export const AxiosInterceptor = () => {
       }
       return response;
     },
-    async (error: any) => {
+    async (error: unknown) => {
       if (isAxiosError(error) && error.code) {
         const request = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
         if (request && !request._retry && !request.url?.includes("refresh"))

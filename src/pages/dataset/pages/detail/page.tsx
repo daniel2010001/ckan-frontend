@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, Navigate, useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 
 import { DatasetAdapter } from "@/adapters/ckan";
 import { Badge } from "@/components/ui/badge";
@@ -26,11 +26,12 @@ import { AddResource } from "./components/add-resource";
 import { ExternalLinkIcon } from "lucide-react";
 
 export function Detail() {
-  const { url } = useParams();
-  if (!url) return <Navigate to={BaseRoutes.NOT_FOUND} replace />;
+  const url = useParams().url ?? "";
+  const navigate = useNavigate();
   const [dataset, setDataset] = useState<Dataset | undefined>();
   const { callEndpoint: loadDataset, loading } = useFetchAndLoader(useState);
-  const navigate = useNavigate();
+
+  if (!url) navigate(BaseRoutes.NOT_FOUND, { replace: true });
 
   useEffectAsync({
     asyncFunction: async () => loadDataset(getDataset(url)),
@@ -90,7 +91,9 @@ export function Detail() {
             {dataset.tags.map((tag) => (
               <Link
                 key={`tag-${tag.name}`}
-                to={DatasetRoutes.BASE(DatasetRoutes.TAG.replace(":name", tag.name))}
+                to={DatasetRoutes.BASE()}
+                state={{ tags: [tag.name] }}
+                // enviar el tag.name como state
               >
                 <Badge
                   key={`${dataset.id}-${tag.id}`}
@@ -153,7 +156,7 @@ export function Detail() {
                     <TableCell className="font-medium">
                       <Link
                         to={DatasetRoutes.RESOURCE.replace(":id", resource.id)}
-                        state={{ resource }}
+                        state={{ ...resource }}
                         className={cn(buttonVariants({ variant: "ghost" }), "p-0 h-4")}
                       >
                         <ExternalLinkIcon className="h-5 w-5 text-gray-500" />

@@ -18,10 +18,10 @@ export const useEffectAfterMount = (effect: EffectCallback, deps?: DependencyLis
   }, deps);
 };
 
-type useEffectAsyncProps<T, D = any> = {
+type useEffectAsyncProps<T, D> = {
   asyncFunction: () => AxiosCall<T, D>["call"];
   successFunction: (data: T) => void;
-  errorFunction?: (error: any) => void;
+  errorFunction?: (error: unknown) => void;
   returnFunction?: EffectCallback;
   deps?: DependencyList;
 };
@@ -38,7 +38,7 @@ type useEffectAsyncProps<T, D = any> = {
  * @param returnFunction Función que se ejecuta cuando el componente se desmonta o si cambian las dependencias
  * @param deps Array de dependencias que se pasa al useEffect
  */
-export const useEffectAsync = <T, D = any>({
+export const useEffectAsync = <T = unknown, D = undefined>({
   asyncFunction,
   successFunction,
   errorFunction = () => {},
@@ -50,14 +50,14 @@ export const useEffectAsync = <T, D = any>({
     asyncFunction()
       .then((result) => {
         if (!isActive) return;
-        if (result instanceof Error) return errorFunction(result);
+        if (!result || result instanceof Error) return errorFunction(result);
         successFunction(result.data);
       })
       .catch((error) => {
         if (isActive) errorFunction(error);
       });
     return () => {
-      if (!!returnFunction) returnFunction();
+      if (returnFunction) returnFunction();
       isActive = false;
     };
   }, deps);

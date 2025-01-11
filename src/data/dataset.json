@@ -1,0 +1,98 @@
+{
+  "author": "author",
+  "authorEmail": "email@author.com",
+  "creatorUserId": "be9b66c2-3e93-4661-92a5-46cebd139af5",
+  "id": "d211b9eb-5a75-405e-acb4-a0234ea5efd0",
+  "isOpen": false,
+  "licenseId": "notspecified",
+  "licenseTitle": "No se especificó la licencia",
+  "maintainer": "mainter",
+  "maintainerEmail": "email@mainter.com",
+  "created": "2024-11-28T18:43:07.855Z",
+  "modified": "2024-11-28T18:43:52.894Z",
+  "url": "url",
+  "description": "description",
+  "numResources": 1,
+  "numTags": 2,
+  "organization": {
+    "id": "8d786260-6417-42ed-882d-97dfba9372a4",
+    "name": "organization-acnq-9811-lhhq",
+    "title": "Black, Wagner and Martin",
+    "type": "organization",
+    "description": "Fish style season wonder five.",
+    "imageUrl": "https://dummyimage.com/97x827",
+    "created": "2024-10-30T07:26:54.789703",
+    "isOrganization": true,
+    "approvalStatus": "approved",
+    "isActive": true
+  },
+  "ownerOrg": "8d786260-6417-42ed-882d-97dfba9372a4",
+  "private": false,
+  "isActive": true,
+  "title": "Title",
+  "type": "dataset",
+  "source": "Referencie",
+  "version": "version",
+  "resources": [
+    {
+      "created": "2024-11-28T18:43:52.887Z",
+      "datastoreActive": false,
+      "datastoreContainsAllRecordsOfSourceFile": false,
+      "description": "",
+      "format": "",
+      "hash": "",
+      "id": "23cb7a02-8797-42df-99e2-998827d54d3b",
+      "lastModified": "1970-01-01T00:00:00.000Z",
+      "metadataModified": "2024-11-28T18:43:52.870Z",
+      "mimetype": null,
+      "name": "",
+      "packageId": "d211b9eb-5a75-405e-acb4-a0234ea5efd0",
+      "position": 0,
+      "resourceType": null,
+      "size": null,
+      "isActive": true,
+      "url": "https://resource.url.com",
+      "urlType": ""
+    }
+  ],
+  "extras": [
+    {
+      "key": "Category",
+      "value": "Category 1"
+    },
+    {
+      "key": "Other field 1",
+      "value": "value field 1"
+    },
+    {
+      "key": "Other field 2",
+      "value": "value field 2"
+    }
+  ],
+  "tags": [
+    {
+      "id": "94cb7364-27ea-4425-a5c6-5ea810b3fbd1",
+      "name": "Tag1",
+      "displayName": "Tag1",
+      "isActive": true
+    },
+    {
+      "id": "25aaf207-5b6a-470c-a3c5-80a184cfe040",
+      "name": "Tag2",
+      "displayName": "Tag2",
+      "isActive": true
+    }
+  ],
+  "groups": [
+    {
+      "id": "f893d533-52b3-4f65-8126-b76ee3193d3f",
+      "name": "grupos-test",
+      "displayName": "grupos test",
+      "title": "grupos test",
+      "description": "descripción",
+      "imageDisplayUrl": "",
+      "created": null,
+      "isActive": false
+    }
+  ]
+}

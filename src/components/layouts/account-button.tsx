@@ -1,19 +1,4 @@
-import {
-  Cloud,
-  CreditCard,
-  Github,
-  Keyboard,
-  LifeBuoy,
-  LogOut,
-  Mail,
-  MessageSquare,
-  Plus,
-  PlusCircle,
-  Settings,
-  User,
-  UserPlus,
-  Users,
-} from "lucide-react";
+import { LogOut } from "lucide-react";
 
 import {
   DropdownMenu,
@@ -29,9 +14,9 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback, AvatarImage } from "@radix-ui/react-avatar";
 import { useAuthStore, useUserStore } from "@/hooks";
 import { BaseRoutes } from "@/models";
+import { Avatar, AvatarFallback, AvatarImage } from "@radix-ui/react-avatar";
 import { useNavigate } from "react-router-dom";
 import { Fragment } from "react/jsx-runtime";
 
@@ -49,32 +34,32 @@ type AccountDropdownItem = {
 };
 
 const accountItems: Array<Array<AccountLinkItem | AccountDropdownItem>> = [
-  [
-    { icon: <User />, label: "Profile", shortcut: "⇧⌘P" },
-    { icon: <CreditCard />, label: "Billing", shortcut: "⌘B" },
-    { icon: <Settings />, label: "Settings", shortcut: "⌘S" },
-    { icon: <Keyboard />, label: "Keyboard shortcuts", shortcut: "⌘K" },
-  ],
-  [
-    { icon: <Users />, label: "Team" },
-    {
-      icon: <UserPlus />,
-      label: "Invite users",
-      items: [
-        [
-          { icon: <Mail />, label: "Email" },
-          { icon: <MessageSquare />, label: "Message" },
-        ],
-        [{ icon: <PlusCircle />, label: "More..." }],
-      ],
-    },
-    { icon: <Plus />, label: "New Team", shortcut: "⌘+T" },
-  ],
-  [
-    { icon: <Github />, label: "GitHub" },
-    { icon: <LifeBuoy />, label: "Support" },
-    { icon: <Cloud />, label: "API" },
-  ],
+  // [
+  //   { icon: <User />, label: "Profile", shortcut: "⇧⌘P" },
+  //   { icon: <CreditCard />, label: "Billing", shortcut: "⌘B" },
+  //   { icon: <Settings />, label: "Settings", shortcut: "⌘S" },
+  //   { icon: <Keyboard />, label: "Keyboard shortcuts", shortcut: "⌘K" },
+  // ],
+  // [
+  //   { icon: <Users />, label: "Team" },
+  //   {
+  //     icon: <UserPlus />,
+  //     label: "Invite users",
+  //     items: [
+  //       [
+  //         { icon: <Mail />, label: "Email" },
+  //         { icon: <MessageSquare />, label: "Message" },
+  //       ],
+  //       [{ icon: <PlusCircle />, label: "More..." }],
+  //     ],
+  //   },
+  //   { icon: <Plus />, label: "New Team", shortcut: "⌘+T" },
+  // ],
+  // [
+  //   { icon: <Github />, label: "GitHub" },
+  //   { icon: <LifeBuoy />, label: "Support" },
+  //   { icon: <Cloud />, label: "API" },
+  // ],
 ];
 
 export function AccountButton() {
@@ -85,17 +70,26 @@ export function AccountButton() {
     await logout()
       .then((bool) => !bool && reset())
       .finally(() => navigate(BaseRoutes.HOME, { replace: true, relative: "route" }));
+
+  function avatarFallback(str: string): string {
+    const palabras = str.split(" ");
+    const primeraInicial = palabras[0]?.charAt(0) || "";
+    const segundaInicial = palabras[1]?.charAt(0) || "";
+    return primeraInicial + segundaInicial;
+  }
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
         asChild
         className="flex h-11 w-11 items-center justify-center rounded-full overflow-hidden p-0"
       >
-        <Avatar>
+        <Avatar className="bg-custom-primary-4/10">
           {user.imageDisplayUrl && (
             <AvatarImage src={user.imageDisplayUrl} alt={user.displayName} />
           )}
-          <AvatarFallback>A</AvatarFallback>
+          <AvatarFallback className="select-none">
+            {avatarFallback(user.displayName ?? "")}
+          </AvatarFallback>
         </Avatar>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56">

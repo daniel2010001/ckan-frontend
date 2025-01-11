@@ -1,18 +1,19 @@
 export interface FieldType {
   text: string;
-  json: any;
+  json: string;
   date: Date;
   time: Date;
   timestamp: Date;
   int: number;
   float: number;
+  numeric: number;
   bool: boolean;
 }
 export type Field = { id: string; type: keyof FieldType };
 export type RecordFormat = "objects" | "lists" | "csv" | "tsv";
 export interface RecordType<F extends readonly Field[]> {
   objects: { [K in F[number] as K["id"]]: FieldType[K["type"]] }[];
-  lists: any[];
+  lists: unknown[];
   csv: string;
   tsv: string;
 }
@@ -24,14 +25,15 @@ export interface DatastoreResponse<T extends RecordFormat> {
   records_format: T;
   resource_id: string;
   total_estimation_threshold: null;
-  records: Record<string, any>[];
+  records: Record<string, string | number | boolean>[];
   fields: Field[];
   _links: {
     start: string;
     next: string;
-    prev?: string; // TODO: enviar desde el backend
-    last?: string; // TODO: enviar desde el backend
-    self?: string; // TODO: enviar desde el backend
+    // TODO: enviar desde el backend
+    prev?: string;
+    last?: string;
+    self?: string;
   };
   total: number;
   total_was_estimated: boolean;

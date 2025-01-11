@@ -1,4 +1,5 @@
-import { Dataset, DatasetResponse } from "@/models/ckan";
+import { AdvancedSearchDatasetType, CategoryType, Dataset, DatasetResponse } from "@/models/ckan";
+import { GroupAdapter } from "./group.adapter";
 import { OrganizationAdapter } from "./organization.adapter";
 import { ResourceAdapter } from "./resource.adapter";
 import { StateAdapter } from "./state.adapter";
@@ -44,8 +45,30 @@ export class DatasetAdapter {
         .sort((a, b) => a.position - b.position),
       extras: datasetResponse.extras,
       tags: datasetResponse.tags.map((item) => TagAdapter.toTag(item)),
-      groups: datasetResponse.groups,
-      category: datasetResponse.extras.find((item) => item.key === "category")?.value,
+      groups: datasetResponse.groups.map((item) => GroupAdapter.toGroup(item)),
+      category:
+        (datasetResponse.extras.find((item) => item.key === "category")?.value as CategoryType) ??
+        "others",
     };
+  }
+
+  /**
+   * Converts a SearchDatasetType to a SearchDatasetRequest
+   * @param schema SearchDatasetType to convert
+   * @returns SearchDatasetRequest
+   *
+   * @example
+   * const searchDatasetRequest = DatasetAdapter.toSearchDatasetRequest(searchDatasetType);
+   */
+  public static toFilterQuery(schema: AdvancedSearchDatasetType): string {
+    return (
+      (schema.title ? `+title:(${schema.title})` : "") +
+      (schema.category?.length ? `+category:("${schema.category.join('" OR "')}")` : "") +
+      (schema.tags?.length ? `+tags:("${schema.tags.join('" AND "')}")` : "") +
+      (schema.organization?.length
+        ? `+organization:("${schema.organization.join('" OR "')}")`
+        : "") +
+      (schema.groups?.length ? `+groups:("${schema.groups.join('" OR "')}")` : "")
+    );
   }
 }

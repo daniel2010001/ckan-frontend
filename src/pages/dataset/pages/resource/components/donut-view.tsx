@@ -1,6 +1,11 @@
 "use client";
 
-import { getDataType, getEmailDomain, parseNumber } from "@/utils/data-validation";
+import {
+  convertToSystemTimeZone,
+  getDataType,
+  getEmailDomain,
+  parseNumber,
+} from "@/utils/data-validation";
 import { formatDateGroup, formatTimeGroup } from "@/utils/date-time-utils";
 import { useEffect, useMemo, useState } from "react";
 import DataSelector from "./data-selector";
@@ -8,7 +13,7 @@ import DonutChart from "./donut-chart";
 import RangeSelector from "./range-selector";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-type ChartDataItem = Record<string, string | number | Date>;
+type ChartDataItem = Record<string, string | number | Date | boolean>;
 
 interface DonutViewProps {
   data: ChartDataItem[];
@@ -50,7 +55,7 @@ export function DonutView({ data }: DonutViewProps) {
         const rangeEnd = rangeStart + numericRange - 1;
         key = `${rangeStart}-${rangeEnd}`;
       } else if (selectedDataType === "date" && isRangeEnabled) {
-        const date = new Date(key);
+        const date = convertToSystemTimeZone(key);
         key = formatDateGroup(date, dateGroupBy);
       } else if (selectedDataType === "time" && isRangeEnabled) {
         key = formatTimeGroup(key, timeRange);
@@ -72,7 +77,9 @@ export function DonutView({ data }: DonutViewProps) {
         if (dateGroupBy === "day") {
           return parseInt(a.name) - parseInt(b.name);
         }
-        return new Date(a.name).getTime() - new Date(b.name).getTime();
+        return (
+          convertToSystemTimeZone(a.name).getTime() - convertToSystemTimeZone(b.name).getTime()
+        );
       }
       return a.name.localeCompare(b.name);
     });

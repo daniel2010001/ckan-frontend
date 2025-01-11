@@ -1,6 +1,6 @@
 import axios, { AxiosRequestConfig, isAxiosError, Method } from "axios";
 
-import { AxiosCall, codeMatcher } from "@/models";
+import { AxiosCall, Call, codeMatcher } from "@/models";
 
 export function loadAbort(): AbortController {
   return new AbortController();
@@ -28,7 +28,7 @@ export function createAxiosCall<T = unknown, D = undefined>(
   config?: AxiosRequestConfig<D>
 ): AxiosCall<T, D> | never {
   const controller = loadAbort();
-  const call = axios<T, Awaited<AxiosCall<T, D>["call"]>, D>({
+  let call = axios<T, Call<T, D>, D>({
     method,
     url,
     data,
@@ -36,7 +36,8 @@ export function createAxiosCall<T = unknown, D = undefined>(
     signal: controller.signal,
     ...config,
   });
-  return { call, controller };
+  const resolved = (data: T) => (call = new Promise((resolve) => resolve({ data } as Call<T, D>)));
+  return { call, controller, resolved };
 }
 
 /**

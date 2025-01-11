@@ -1,1 +1,1 @@
-export type State = "active" | "deleted";
+export type State = "active" | "deleted" | "draft";

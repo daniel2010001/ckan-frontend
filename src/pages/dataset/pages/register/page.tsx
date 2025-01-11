@@ -1,4 +1,9 @@
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useRef, useState } from "react";
+import { ControllerRenderProps, useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
+import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -10,17 +15,13 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
-import { extractDefaultValues, loadAbortable } from "@/utils";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { ControllerRenderProps, useForm } from "react-hook-form";
-import { z } from "zod";
-import { toast } from "sonner";
-import { createDatasets } from "@/services/ckan";
-import { useRef, useState } from "react";
 import { BaseRoutes } from "@/models";
-import { Separator } from "@/components/ui/separator";
+import { createDatasets } from "@/services/ckan";
+import { extractDefaultValues, loadAbortable } from "@/utils";
+
 import { Loader2 } from "lucide-react";
 
 const DatasetSchema = z.object({
@@ -39,9 +40,9 @@ const DatasetSchema = z.object({
   title: z.string().max(100, "El título debe tener menos de 100 caracteres").optional().default(""),
   private: z.boolean().optional().default(false),
   author: z.string().optional().default(""),
-  author_email: z.string().optional().default(""),
+  author_email: z.string().optional().default(""), // TODO: Agregar regex para email
   maintainer: z.string().optional().default(""),
-  maintainer_email: z.string().optional().default(""),
+  maintainer_email: z.string().optional().default(""), // TODO: Agregar regex para email
   license: z.string().optional().default(""),
   notes: z
     .string()
@@ -52,10 +53,10 @@ const DatasetSchema = z.object({
     .string({ invalid_type_error: "La url debe ser una cadena de texto" })
     .max(100, "La url debe tener menos de 100 caracteres")
     .optional()
-    .default(""),
+    .default(""), // TODO: Agregar regex para url
   version: z.string().optional().default(""),
   tags: z.string().min(3, "Las etiquetas deben tener al menos 3 caracteres").optional().default(""),
-  category: z.string().optional().default(""),
+  category: z.string().default(""),
   // resources: z.array(z.string()).min(1, "Debe ingresar al menos una url").optional().default([]),
   // groups: z.array(z.string()).min(1, "Debe ingresar al menos un grupo").optional().default([]),
   organization: z.string().optional().default(""),
@@ -145,7 +146,7 @@ function InputType({
       return (
         <Textarea
           {...field}
-          value={field.value as any}
+          value={field.value as string}
           placeholder={placeholder}
           className="resize-none border-custom-gray"
         />
@@ -154,7 +155,7 @@ function InputType({
       return (
         <Input
           {...field}
-          value={field.value as any}
+          value={field.value as string}
           placeholder={placeholder}
           className="border-custom-gray !text-sm "
         />
@@ -188,7 +189,7 @@ export function Register() {
       extras: [{ key: "category", value: data.category }],
       owner_org: data.owner_org,
     };
-    const response = await loadAbortable<any, any>(createDatasets(payload));
+    const response = await loadAbortable(createDatasets(payload));
     if (!response || response instanceof Error) return;
     toast("Dataset created successfully", {
       description: (

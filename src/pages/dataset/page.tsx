@@ -1,95 +1,63 @@
+"use client";
+
 import { Fragment, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 import { DatasetAdapter } from "@/adapters/ckan";
 import { Badge } from "@/components/ui/badge";
-import { Button, buttonVariants } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { useAuthStore, useEffectAsync, useFetchAndLoader } from "@/hooks";
-import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { useEffectAsync, useFetchAndLoader } from "@/hooks";
 import { DatasetRoutes } from "@/models";
-import { Dataset } from "@/models/ckan";
-import { getDatasets } from "@/services/ckan";
+import { Dataset, SearchDatasetRequest } from "@/models/ckan";
+import { searchDatasets } from "@/services/ckan";
 
+import { SearchInput } from "@/components/ui/search-input";
 import { LockClosedIcon } from "@radix-ui/react-icons";
 
-type DatasetsProps = {
-  id?: string;
-  name?: string;
-  tag?: string;
-};
-
 export function Datasets() {
-  const location = useLocation();
-  const { id: _0, name: _1 } = (location.state || {}) as DatasetsProps;
-  const { type } = useAuthStore();
+  const [payload, setPayload] = useState<SearchDatasetRequest>({});
   const [items, setItems] = useState<Dataset[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
-
-  const totalItems = items.length;
+  const [totalItems, setTotalItems] = useState(0);
   const itemsPerPage = 12;
   const totalPages = Math.ceil(totalItems / itemsPerPage);
-
   const { callEndpoint: loadDatasets } = useFetchAndLoader(useState);
 
   useEffectAsync({
-    asyncFunction: async () => loadDatasets(getDatasets()),
-    successFunction: (data) => setItems(data.map((item) => DatasetAdapter.toDataset(item))),
+    asyncFunction: async () =>
+      loadDatasets(
+        searchDatasets({
+          ...payload,
+          rows: itemsPerPage,
+          start: (currentPage - 1) * itemsPerPage,
+        })
+      ),
+    successFunction: ({ count, results }) => {
+      setTotalItems(count);
+      setItems(results.map(DatasetAdapter.toDataset));
+    },
+    deps: [payload, currentPage],
   });
-
-  const getCurrentItems = (): Dataset[] => {
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    const endIndex = startIndex + itemsPerPage;
-    return items.slice(startIndex, endIndex);
-  };
 
   return (
     <div className="container mx-auto flex flex-col gap-4 px-6 py-8">
-      {/* Title */}
-      <h1 className="text-4xl font-bold mb-2 mx-auto">Lista de Objetos</h1>
+      {/* Header */}
+      <h1 className="text-4xl font-bold mb-2 mx-auto">Conjuntos de datos</h1>
       <p className="text-xl text-gray-600 ~text-center">
         Esta página muestra una colección de Datasets con sus detalles. Actualmente hay {totalItems}{" "}
         conjunto de datos en la lista.
       </p>
 
       {/* Search and sort */}
-      <div className="flex flex-col w-full sm:flex-row justify-between items-center mb-6 gap-4">
-        <Input type="search" placeholder="Buscar objetos..." className="!w-full sm:w-64" />
-        <Select>
-          <SelectTrigger className="w-full sm:w-48">
-            <SelectValue placeholder="Ordenar por" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="title">Título</SelectItem>
-            <SelectItem value="date">Fecha</SelectItem>
-            <SelectItem value="relevance">Relevancia</SelectItem>
-          </SelectContent>
-        </Select>
-        {type && (
-          <Link
-            className={cn(
-              buttonVariants(),
-              "bg-custom-primary-2 hover:bg-custom-secondary-2 text-white"
-            )}
-            to={DatasetRoutes.REGISTER}
-          >
-            Agregar Conjunto de Datos
-          </Link>
-        )}
+      <div className="flex flex-col w-full sm:flex-row items-center gap-4">
+        <SearchInput setPayload={setPayload} />
       </div>
 
       {/* List of items */}
-      {getCurrentItems().length > 0 ? (
+      {items.length > 0 ? (
         <Fragment>
           <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {getCurrentItems().map((item, index) => (
+            {items.map((item, index) => (
               <li
                 key={`${item.id}-${index}`}
                 className="border rounded-lg p-4 bg-white shadow hover:shadow-md hover:shadow-custom-primary-2 transition-all duration-300 ease-in-out hover:scale-105 hover:border-custom-primary-2 hover:bg-custom-primary-2/20"
@@ -108,11 +76,6 @@ export function Datasets() {
                     {item.description || "Este dataset no tiene descripción"}
                   </p>
                   <div className="flex flex-wrap gap-2">
-                    {/* {item.tags.map((tag) => (
-                      <Badge key={`${item.id}-${tag.id}`} variant="secondary">
-                        {tag.displayName}
-                      </Badge>
-                    ))} */}
                     {Array.from(
                       new Set(item.resources.filter((r) => r.format).map((r) => r.format))
                     ).map((format) => (

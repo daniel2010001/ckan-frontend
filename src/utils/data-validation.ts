@@ -53,3 +53,11 @@ export function getDataType(values: any[]): "numeric" | "date" | "time" | "email
 export function getEmailDomain(email: string): string {
   return email.split("@")[1];
 }
+
+export function convertToSystemTimeZone(dateString: string): Date {
+  const date = new Date(dateString);
+  const offsetMinutes = date.getTimezoneOffset();
+  const localDate = new Date(date.getTime() + offsetMinutes * 60 * 1000);
+  // const adjustedDate = new Date(localDate.getTime() + 14400000);
+  return localDate;
+}

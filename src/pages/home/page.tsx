@@ -1,30 +1,23 @@
-import { Link } from "react-router-dom";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 
 import { Footer } from "@/components/layouts";
 import { Background } from "@/components/ui/background";
 import { Button, buttonVariants } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
+import { useEffectAsync, useFetchAndLoader } from "@/hooks";
 import { cn } from "@/lib/utils";
-import { DatasetRoutes, Notice } from "@/models";
+import { DatasetRoutes, Notice, Option } from "@/models";
+import { Categories } from "@/models/ckan/dataset.model";
+import { lastNotices } from "@/services";
+import { NoticesCarousel } from "./components";
 
-import callCenterData from "@/assets/icons/call-center-data.svg";
-import environment from "@/assets/icons/environment.svg";
-import health from "@/assets/icons/health.svg";
+import { NoticeAdapter } from "@/adapters";
 import organization from "@/assets/icons/organization.svg";
-import overdue from "@/assets/icons/overdue.svg";
 import popularity from "@/assets/icons/popularity.svg";
-import population from "@/assets/icons/population.svg";
-import townPlanning from "@/assets/icons/town-planning.svg";
 import update from "@/assets/icons/update.svg";
-import urbanMobility from "@/assets/icons/urban-mobility.svg";
 import noticias from "@/assets/images/noticias.png";
 import { Search } from "lucide-react";
-import { NoticesCarousel } from "./components";
-import { useState } from "react";
-import { useEffectAsync, useFetchAndLoader } from "@/hooks";
-import { lastNotices } from "@/services";
-import { NoticeAdapter } from "@/adapters";
 
 const description =
   "Cochabamba Open Data es una plataforma digital que proporciona acceso libre a los datos públicos generados por la Alcaldía de Cochabamba. Este portal permite a ciudadanos, investigadores, empresas y desarrolladores explorar, descargar y utilizar conjuntos de datos en diferentes áreas. Su objetivo es fomentar la transparencia, impulsar la innovación y apoyar la toma de decisiones informadas, promoviendo así el desarrollo de aplicaciones y soluciones que beneficien a la comunidad de Cochabamba.";
@@ -42,24 +35,16 @@ const carts: Array<{ title: string; description: string }> = [
   },
 ];
 
-const categories: Array<{ name: string; icon: string; to: string }> = [
-  { name: "Población", icon: population, to: "population" },
-  { name: "Salud", icon: health, to: "health" },
-  { name: "Movilidad urbana", icon: urbanMobility, to: "urban-mobility" },
-  { name: "Mora", icon: overdue, to: "overdue" },
-  { name: "Medio ambiente", icon: environment, to: "environment" },
-  { name: "Urbanismo", icon: townPlanning, to: "town-planning" },
-  { name: "Call center data", icon: callCenterData, to: "call-center-data" },
-];
-
-const orderBy: Array<{ text: string; icon: string; sortBy: string }> = [
-  { text: "Datos más vistos", icon: popularity, sortBy: "popularity" },
-  { text: "Datos reciente añadidos", icon: update, sortBy: "update" },
-  { text: "Datos por organización", icon: organization, sortBy: "organization" },
+const orderBy: Array<Omit<Option, "icon"> & { icon: string }> = [
+  { label: "Datos más vistos", icon: popularity, value: "popularity", disabled: true },
+  { label: "Datos reciente añadidos", icon: update, value: "metadata_modified desc" },
+  { label: "Datos por organización", icon: organization, value: "organization", disabled: true },
 ];
 
 export function Home() {
+  const navigate = useNavigate();
   const [notices, setNotices] = useState<Array<Notice>>([]);
+  const [query, setQuery] = useState("");
 
   const { callEndpoint: loadNotices } = useFetchAndLoader(useState);
 
@@ -67,6 +52,10 @@ export function Home() {
     asyncFunction: async () => await loadNotices(lastNotices()),
     successFunction: (data) => setNotices(data.map(NoticeAdapter.toNotice)),
   });
+
+  function handleSearch() {
+    navigate(DatasetRoutes.BASE(), { state: { q: query } });
+  }
 
   return (
     <div className="flex flex-col items-center justify-center">
@@ -77,14 +66,15 @@ export function Home() {
             <h1 className="text-6xl border-0 border-b-2 border-white">COCHABAMBA</h1>
             <h2 className="text-3xl mt-2">DATOS ABIERTOS</h2>
           </div>
-          <div className="relative w-1/2 flex items-center justify-center text-black">
-            <Input type="text" placeholder="Buscar datasets..." className="rounded-full bg-white" />
-            <Button
-              size="icon"
-              variant="ghost"
-              className="absolute rounded-full right-2"
-              type="submit"
-            >
+          <div className="relative w-1/2 flex items-center justify-center text-black bg-white px-4 rounded-full">
+            <input
+              placeholder="Buscar conjunto de datos..."
+              className="w-full outline-none m-2"
+              onChange={(e) => setQuery(e.target.value)}
+              value={query}
+              onKeyUp={(e) => e.key === "Enter" && handleSearch()}
+            />
+            <Button size="icon" variant="ghost" className="absolute right-4" onClick={handleSearch}>
               <Search />
             </Button>
           </div>
@@ -96,17 +86,18 @@ export function Home() {
       <div className="w-full flex flex-col items-center justify-center px-24 py-12 text-center relative">
         <h1 className="text-2xl mb-8">CATEGOR&Iacute;AS</h1>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-          {categories.map(({ name, icon, to }, index) => (
+          {Object.values<Option>(Categories).map((category, index) => (
             <Link
               key={`category-${index}`}
-              to={DatasetRoutes.BASE(DatasetRoutes.CATEGORY.replace(":category", to))}
+              to={DatasetRoutes.BASE()}
+              state={{ category: [category.value] }}
               className={cn(
                 buttonVariants({ variant: "ghost" }),
                 "flex items-center justify-start border-none h-auto"
               )}
             >
-              <img src={icon} alt={name} className="w-16 h-16 mb-2 mx-4" />
-              <p className="text-base font-medium mx-auto">{name}</p>
+              {category.icon && <category.icon className="mb-2 mx-4 !size-10" />}
+              <p className="text-base font-medium mx-auto">{category.label}</p>
             </Link>
           ))}
         </div>
@@ -116,18 +107,18 @@ export function Home() {
       <div className="w-full flex flex-col items-center justify-center px-24 py-12 text-center relative">
         <h1 className="text-2xl mb-8">VER LISTA DE DATOS</h1>
         <div className="w-full grid grid-cols-1 gap-20 md:grid-cols-2 lg:grid-cols-3">
-          {orderBy.map(({ text: name, icon, sortBy }, index) => (
+          {orderBy.map(({ label, icon, value }, index) => (
             <Link
               key={`order-by-${index}`}
               to={DatasetRoutes.BASE()}
-              state={{ sortBy: sortBy }}
+              state={{ sortBy: value }}
               className={cn(
                 buttonVariants({ variant: "ghost" }),
                 "flex flex-col items-center justify-start border-none h-auto"
               )}
             >
-              <img src={icon} alt={name} className="w-16 h-16 my-2 mx-4" />
-              <p className="text-2xl font-medium mx-auto mb-4">{name}</p>
+              <img src={icon} alt={label} className="w-16 h-16 my-2 mx-4" />
+              <p className="text-2xl font-medium mx-auto mb-4">{label}</p>
             </Link>
           ))}
         </div>

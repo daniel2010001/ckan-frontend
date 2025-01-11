@@ -1,8 +1,11 @@
 import { AxiosError, AxiosResponse } from "axios";
 import { TypeWithKey } from ".";
+
+export type Call<T, D> = AxiosResponse<T, D> | AxiosError<T, D>;
 export interface AxiosCall<T = unknown, D = undefined> {
-  call: Promise<AxiosResponse<T, D> | AxiosError<T, D>>;
+  call: Promise<Call<T, D>>;
   controller: AbortController;
+  resolved: (data: T) => void;
 }
 
 /** Objeto con los códigos de error personalizados y sus respectivos mensajes de error */

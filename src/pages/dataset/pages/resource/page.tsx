@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
@@ -26,7 +25,7 @@ import { BarChart, ControlPanel, DataTable, getColumns, DonutView } from "./comp
 import { ExternalLinkIcon, LinkIcon } from "lucide-react";
 
 function DataTableView({ resourceId }: { resourceId: string }) {
-  const [data, setData] = useState<Record<string, any>[]>([]);
+  const [data, setData] = useState<Record<string, string | number | boolean>[]>([]);
   const [columns, setColumns] = useState<string[]>([]);
   const [selectedXAxis, setSelectedXAxis] = useState<string>("");
   const [selectedDataKeys, setSelectedDataKeys] = useState<Array<string>>([]);
@@ -36,12 +35,11 @@ function DataTableView({ resourceId }: { resourceId: string }) {
   useEffectAsync({
     asyncFunction: async () => await loadDatastore(getDatastore(resourceId)),
     successFunction: ({ records, fields }) => {
-      console.log(fields, records);
-      setData(records.sort((a, b) => a._id - b._id).map(({ _id, ...item }) => item));
+      setData(records.map(({ _id, ...item }) => item));
       setColumns(fields.filter((item) => item.id !== "_id").map((item) => item.id));
       setSelectedXAxis(fields.filter((item) => item.id !== "_id")[0].id);
     },
-    errorFunction: () => console.log("Error"),
+    errorFunction: () => console.log("Error: No se pudo cargar los datos de la tabla"),
     deps: [resourceId],
   });
 
@@ -126,25 +124,24 @@ export function TablaDetails({ view }: { view: View }) {
 export function Resource() {
   const id = useParams().id ?? "";
   const location = useLocation();
-  const [resource, setResource] = useState<ResourceType | undefined>(
-    () => location.state?.resource
-  );
+  const navigate = useNavigate();
+  const [resource, setResource] = useState<ResourceType | undefined>(() => location.state);
   const [resourceViews, setResourceViews] = useState<View[]>([]);
   const { callEndpoint: loadResource, loading } = useFetchAndLoader(useState);
-  const { callEndpoint: loadResourceView, loading: loadingView } = useFetchAndLoader(useState);
-  const navigate = useNavigate();
+  const { callEndpoint: loadView, loading: loadingView } = useFetchAndLoader(useState);
 
   if (!id) navigate(BaseRoutes.NOT_FOUND, { replace: true });
 
   useEffectAsync({
-    asyncFunction: async () => (resource ? ({} as any) : await loadResource(getResource(id))),
-    successFunction: (data) => data && setResource(ResourceAdapter.toResource(data as any)),
-    errorFunction: () => navigate(BaseRoutes.NOT_FOUND, { replace: true }),
+    asyncFunction: async () =>
+      await loadResource(resource ? ({} as ReturnType<typeof getResource>) : getResource(id)),
+    successFunction: (data) => setResource(ResourceAdapter.toResource(data)),
+    errorFunction: () => !resource && navigate(BaseRoutes.NOT_FOUND, { replace: true }),
     deps: [id],
   });
 
   useEffectAsync({
-    asyncFunction: async () => await loadResourceView(getResourceViewList(id)),
+    asyncFunction: async () => await loadView(getResourceViewList(id)),
     successFunction: (data) => setResourceViews(data.map(ViewAdapter.toView)),
     errorFunction: () => navigate(BaseRoutes.NOT_FOUND, { replace: true }),
     deps: [id],
