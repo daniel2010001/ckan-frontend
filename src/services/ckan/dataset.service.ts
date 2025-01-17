@@ -1,4 +1,10 @@
-import { DatasetResponse, SearchDatasetRequest, SearchDatasetResponse } from "@/models/ckan";
+import {
+  DatasetRequest,
+  DatasetResponse,
+  LicenseResponse,
+  SearchDatasetRequest,
+  SearchDatasetResponse,
+} from "@/models/ckan";
 import { createAxiosCall } from "@/utils";
 
 export const getDatasets = () =>
@@ -10,7 +16,7 @@ export const getDatasets = () =>
     { params: { limit: 999 } }
   );
 
-export const createDatasets = (data: unknown) =>
+export const createDatasets = (data: DatasetRequest) =>
   createAxiosCall("POST", `/api/ckan/package_create/`, data);
 
 export const getDataset = (nameOrId: string) =>
@@ -24,3 +30,6 @@ export const searchDatasets = (data: SearchDatasetRequest) =>
     `/api/ckan/package_search/`,
     data
   );
+
+export const getLicenses = () =>
+  createAxiosCall<LicenseResponse[]>("GET", `/api/ckan/license_list/`);

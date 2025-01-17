@@ -19,7 +19,7 @@ export function Datasets() {
   const [items, setItems] = useState<Dataset[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
-  const itemsPerPage = 12;
+  const itemsPerPage = 9;
   const totalPages = Math.ceil(totalItems / itemsPerPage);
   const { callEndpoint: loadDatasets } = useFetchAndLoader(useState);
 
@@ -98,7 +98,7 @@ export function Datasets() {
             >
               Anterior
             </Button>
-            <span className="text-sm font-medium">
+            <span className="text-sm font-medium mx-4">
               Página {currentPage} de {totalPages}
             </span>
             <Button

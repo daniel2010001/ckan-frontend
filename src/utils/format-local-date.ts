@@ -1,9 +1,22 @@
-export function formatDate(date: Date) {
-  const day = date.getDate();
-  const month = date.getMonth() + 1;
-  const year = date.getFullYear();
-  return `${day}/${month}/${year}`;
-}
+import { timestampFormats, DateFormat } from "@/models/ckan";
+
+export const formatDate = (date: Date, format: DateFormat) => {
+  const options: Intl.DateTimeFormatOptions = {};
+  if (format === timestampFormats.DD_MM_YYYY.value)
+    return date.toLocaleDateString("es-ES", { day: "2-digit", month: "2-digit", year: "numeric" });
+  const splitFormat = format.split("-");
+  if (splitFormat.includes("quarter")) {
+    const quarter = Math.floor((date.getMonth() + 3) / 3);
+    return `Q${quarter} ${splitFormat.includes("year") ? date.getFullYear() : ""}`;
+  }
+  if (splitFormat.includes("day")) options.day = "numeric";
+  if (splitFormat.includes("month")) options.month = "long";
+  if (splitFormat.includes("year")) options.year = "numeric";
+  if (splitFormat.includes("weekday")) options.weekday = "long";
+  if (splitFormat.includes("hour")) options.hour = "2-digit";
+  if (splitFormat.includes("minute")) options.minute = "2-digit";
+  return date.toLocaleDateString("es-ES", options);
+};
 
 export const formatDate_YYYY_MM_DD = (date: Date): string => {
   return date.toLocaleDateString("en-CA");
@@ -22,9 +35,7 @@ export const timeAgo = (date: Date): string => {
   const now = new Date();
   const seconds = Math.floor((now.getTime() - date.getTime()) / 1000);
 
-  if (seconds < 60) {
-    return "Justo ahora";
-  }
+  if (seconds < 60) return "Justo ahora";
 
   const intervals: { [key: string]: number } = {
     año: 31536000,
@@ -37,9 +48,7 @@ export const timeAgo = (date: Date): string => {
 
   for (const [unit, value] of Object.entries(intervals)) {
     const interval = Math.floor(seconds / value);
-    if (interval >= 1) {
-      return `Hace ${interval} ${unit}${interval > 1 ? "s" : ""}`;
-    }
+    if (interval >= 1) return `Hace ${interval} ${unit}${interval > 1 ? "s" : ""}`;
   }
 
   return "Justo ahora";

@@ -3,7 +3,16 @@ import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
 
 import { ResourceAdapter, ViewAdapter } from "@/adapters/ckan";
+import { DatastoreAdapter } from "@/adapters/ckan/datastore.adapter";
 import { Button, buttonVariants } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   Table,
   TableBody,
@@ -14,19 +23,25 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useEffectAsync, useFetchAndLoader } from "@/hooks";
+import { useAuthStore, useEffectAsync, useFetchAndLoader } from "@/hooks";
 import { cn } from "@/lib/utils";
-import { BaseRoutes } from "@/models";
-import { Resource as ResourceType, View, ViewType } from "@/models/ckan";
+import { BaseRoutes, DatasetRoutes } from "@/models";
+import {
+  Datastore,
+  fieldTypes,
+  Resource as ResourceType,
+  timestampFormats,
+  View,
+  viewTypes,
+} from "@/models/ckan";
 import { getDatastore, getResource, getResourceViewList } from "@/services/ckan";
-import { convertFileSize, formatDate_DD_MMMM_YYYY } from "@/utils";
-import { BarChart, ControlPanel, DataTable, getColumns, DonutView } from "./components";
+import { convertFileSize, formatDate } from "@/utils";
+import { BarChart, ControlPanel, DataTable, DonutView, getColumns } from "./components";
 
-import { ExternalLinkIcon, LinkIcon } from "lucide-react";
+import { DownloadIcon, LinkIcon, WrenchIcon } from "lucide-react";
 
 function DataTableView({ resourceId }: { resourceId: string }) {
-  const [data, setData] = useState<Record<string, string | number | boolean>[]>([]);
-  const [columns, setColumns] = useState<string[]>([]);
+  const [datastore, setDatastore] = useState<Datastore | undefined>();
   const [selectedXAxis, setSelectedXAxis] = useState<string>("");
   const [selectedDataKeys, setSelectedDataKeys] = useState<Array<string>>([]);
   const [totalBar, setTotalBar] = useState(true);
@@ -34,10 +49,10 @@ function DataTableView({ resourceId }: { resourceId: string }) {
 
   useEffectAsync({
     asyncFunction: async () => await loadDatastore(getDatastore(resourceId)),
-    successFunction: ({ records, fields }) => {
-      setData(records.map(({ _id, ...item }) => item));
-      setColumns(fields.filter((item) => item.id !== "_id").map((item) => item.id));
-      setSelectedXAxis(fields.filter((item) => item.id !== "_id")[0].id);
+    successFunction: (data) => {
+      const datastore = DatastoreAdapter.toDatastore(data);
+      setDatastore(datastore);
+      setSelectedXAxis(datastore.fields[0].id);
     },
     errorFunction: () => console.log("Error: No se pudo cargar los datos de la tabla"),
     deps: [resourceId],
@@ -54,45 +69,82 @@ function DataTableView({ resourceId }: { resourceId: string }) {
   const handleTotalBarChange = () => setTotalBar((prev) => !prev);
 
   if (loading) return <div>Loading...</div>;
+  if (!datastore) return <div>No se encontró el recurso</div>;
   return (
-    <Tabs defaultValue="bar-chart">
-      <TabsList>
-        <TabsTrigger value={"table"}>Tabla</TabsTrigger>
-        <TabsTrigger value={"bar-chart"}>Gráfico de barras</TabsTrigger>
-        <TabsTrigger value={"donut-chart"}>Gráfico de Donut</TabsTrigger>
-      </TabsList>
+    <div>
+      <Tabs defaultValue="bar-chart">
+        <TabsList>
+          <TabsTrigger value={"table"}>Tabla</TabsTrigger>
+          <TabsTrigger value={"bar-chart"}>Gráfico de barras</TabsTrigger>
+          <TabsTrigger value={"donut-chart"}>Gráfico de Donut</TabsTrigger>
+        </TabsList>
 
-      {/* Dataset table */}
-      <TabsContent value={"table"} className="container mx-auto bg-transparent">
-        <DataTable columns={getColumns(columns)} data={data} />
-      </TabsContent>
+        {/* Dataset table */}
+        <TabsContent value={"table"} className="container mx-auto bg-transparent">
+          <DataTable columns={getColumns(datastore.fields)} data={datastore.records} />
+        </TabsContent>
 
-      {/* Dataset details */}
-      <TabsContent value={"bar-chart"} className="container mx-auto bg-transparent flex gap-4">
-        {data.length > 0 && (
-          <BarChart
-            data={data}
-            xAxis={selectedXAxis}
-            dataKeys={selectedDataKeys}
+        {/* Dataset details */}
+        <TabsContent value={"bar-chart"} className="container mx-auto bg-transparent flex gap-4">
+          {datastore.records.length > 0 && (
+            <BarChart
+              data={datastore.records}
+              xAxis={selectedXAxis}
+              dataKeys={selectedDataKeys}
+              totalBar={totalBar}
+            />
+          )}
+          <ControlPanel
             totalBar={totalBar}
+            columns={datastore.fields.map((item) => item.id)}
+            selectedXAxis={selectedXAxis}
+            selectedDataKeys={selectedDataKeys}
+            onXAxisChange={handleXAxisChange}
+            onDataKeyChange={handleDataKeyChange}
+            onTotalBarChange={handleTotalBarChange}
           />
-        )}
-        <ControlPanel
-          totalBar={totalBar}
-          columns={columns}
-          selectedXAxis={selectedXAxis}
-          selectedDataKeys={selectedDataKeys}
-          onXAxisChange={handleXAxisChange}
-          onDataKeyChange={handleDataKeyChange}
-          onTotalBarChange={handleTotalBarChange}
-        />
-      </TabsContent>
+        </TabsContent>
 
-      {/* Pie chart */}
-      <TabsContent value="donut-chart" className="container mx-auto bg-transparent">
-        <DonutView data={data} />
-      </TabsContent>
-    </Tabs>
+        {/* Pie chart */}
+        <TabsContent value="donut-chart" className="container mx-auto bg-transparent">
+          <DonutView data={datastore.records} />
+        </TabsContent>
+      </Tabs>
+
+      {/* Tabla de detalles */}
+      <Table>
+        <TableCaption>Detalles del Datastore</TableCaption>
+        <TableHeader>
+          <TableRow className="text-lg !bg-custom-gray/15">
+            <TableHead className="text-black">ID</TableHead>
+            <TableHead className="text-black">Cabecera</TableHead>
+            <TableHead className="text-black">Descripción</TableHead>
+            <TableHead className="text-black">Tipo</TableHead>
+            <TableHead className="text-black">Unidad</TableHead>
+            <TableHead className="text-black">Formato de fecha</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {datastore.fields.map(({ id, info, type }) => {
+            const { label, notes, unit } = info || {};
+            const fieldType = Object.values(fieldTypes).find(({ value }) => value === type);
+            const timestampFormat = Object.values(timestampFormats).find(
+              ({ value }) => value === info?.timestamp_format
+            );
+            return (
+              <TableRow key={`field-${id}`}>
+                <TableCell className="font-medium">{id}</TableCell>
+                <TableCell>{label || id}</TableCell>
+                <TableCell>{notes || "-"}</TableCell>
+                <TableCell>{fieldType?.label || "-"}</TableCell>
+                <TableCell>{unit || "-"}</TableCell>
+                <TableCell>{timestampFormat?.label || "-"}</TableCell>
+              </TableRow>
+            );
+          })}
+        </TableBody>
+      </Table>
+    </div>
   );
 }
 
@@ -125,6 +177,7 @@ export function Resource() {
   const id = useParams().id ?? "";
   const location = useLocation();
   const navigate = useNavigate();
+  const { type: isLogged } = useAuthStore();
   const [resource, setResource] = useState<ResourceType | undefined>(() => location.state);
   const [resourceViews, setResourceViews] = useState<View[]>([]);
   const { callEndpoint: loadResource, loading } = useFetchAndLoader(useState);
@@ -133,8 +186,8 @@ export function Resource() {
   if (!id) navigate(BaseRoutes.NOT_FOUND, { replace: true });
 
   useEffectAsync({
-    asyncFunction: async () =>
-      await loadResource(resource ? ({} as ReturnType<typeof getResource>) : getResource(id)),
+    asyncFunction: () =>
+      loadResource(resource ? ({} as ReturnType<typeof getResource>) : getResource(id)),
     successFunction: (data) => setResource(ResourceAdapter.toResource(data)),
     errorFunction: () => !resource && navigate(BaseRoutes.NOT_FOUND, { replace: true }),
     deps: [id],
@@ -147,7 +200,7 @@ export function Resource() {
     deps: [id],
   });
 
-  if (loading && loadingView) return <div>Loading...</div>;
+  if (loading || loadingView) return <div>Loading...</div>;
   if (!resource) return <div>No se encontró el recurso</div>;
 
   const resourceDetails = [
@@ -155,15 +208,14 @@ export function Resource() {
     { label: "Formato", value: resource.format },
     { label: "Tamaño", value: convertFileSize(resource.size, "B", "KB") },
     { label: "Tipo", value: resource.mimetype },
-    // agregar last_modified, metadata_modified, created
-    { label: "Fecha de creación", value: formatDate_DD_MMMM_YYYY(resource.created) },
+    { label: "Fecha de creación", value: formatDate(resource.created, "year-month-day-weekday") },
     {
       label: "Fecha de última modificación",
-      value: formatDate_DD_MMMM_YYYY(resource.lastModified),
+      value: formatDate(resource.lastModified, "year-month-day-weekday"),
     },
     {
       label: "Fecha de última actualización",
-      value: formatDate_DD_MMMM_YYYY(resource.metadataModified),
+      value: formatDate(resource.metadataModified, "year-month-day-weekday"),
     },
   ];
 
@@ -181,9 +233,10 @@ export function Resource() {
 
   return (
     <div className="container mx-auto flex flex-col gap-8 px-6 py-8">
+      {/* Header */}
       <div className="flex items-center gap-4 justify-between">
         <h1 className="text-2xl font-bold flex items-center gap-2">
-          <Button variant="ghost" size="icon" onClick={copyLink}>
+          <Button variant="outline" size="icon" onClick={copyLink}>
             <LinkIcon width={20} height={20} />
           </Button>
           {resource.name}
@@ -198,9 +251,40 @@ export function Resource() {
             target="_blank"
             rel="noopener noreferrer"
           >
-            Ver archivo del recurso
-            <ExternalLinkIcon className="ml-2 h-4 w-4" />
+            Descargar
+            <DownloadIcon className="size-4" />
           </Link>
+          {isLogged && (
+            <>
+              <DropdownMenu>
+                <DropdownMenuTrigger className={buttonVariants({ variant: "outline" })}>
+                  Manager
+                  {/* Un ícono de herramienta para mostrar el menú desplegable */}
+                  <WrenchIcon className="size-5" />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <DropdownMenuItem disabled>Editar recurso</DropdownMenuItem>
+                  <DropdownMenuItem disabled>Crear vista</DropdownMenuItem>
+                  {resource.datastoreActive && (
+                    <>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuLabel>Datastore</DropdownMenuLabel>
+                      <DropdownMenuItem asChild>
+                        <Link to={DatasetRoutes.DICTIONARY} state={resource}>
+                          Editar diccionario
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link to={DatasetRoutes.NEW_CHART} state={resource}>
+                          Crear nuevo gráfico
+                        </Link>
+                      </DropdownMenuItem>
+                    </>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </>
+          )}
         </div>
       </div>
 
@@ -247,7 +331,7 @@ export function Resource() {
         {/* Tab for views */}
         {resourceViews.map((view) => (
           <TabsContent key={`view-${view.title}`} value={view.title}>
-            {view.type === ViewType.TABLE && <DataTableView resourceId={resource.id} />}
+            {view.type === viewTypes.TABLE.value && <DataTableView resourceId={resource.id} />}
           </TabsContent>
         ))}
       </Tabs>

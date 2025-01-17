@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -23,9 +22,9 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { extractDefaultValues, loadAbortable } from "@/utils";
+import { createResource } from "@/services/ckan";
 
 import { Loader2 } from "lucide-react";
-import { createResource } from "@/services/ckan";
 
 const maxFileSize = 1048576 * 5;
 
@@ -59,10 +58,9 @@ export function AddResource({ package_id }: AddResourceProps) {
   });
 
   const onSubmit = async (data: z.infer<typeof schema>) => {
-    console.log({ package_id, ...data });
-    // esperar 5 segundos
-    // await new Promise((resolve) => setTimeout(resolve, 5000));
-    await loadAbortable(createResource({ package_id, ...data }));
+    const response = await loadAbortable(createResource({ package_id, ...data }));
+    if (!response || response instanceof Error) return;
+    window.location.reload();
   };
 
   return (
@@ -72,11 +70,7 @@ export function AddResource({ package_id }: AddResourceProps) {
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Agregar recurso</DialogTitle>
-          <DialogDescription>
-            {/* crear descripción para agregar recursos */}
-            Puedes agregar algún recurso.
-          </DialogDescription>
+          <DialogTitle className="text-center">Agregar recurso</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form className="grid gap-4">

@@ -94,34 +94,69 @@ export const PathSchema = () =>
     .string()
     .min(3, "Debe ingresar al menos 3 caracteres")
     .max(100, "Debe ingresar menos de 100 caracteres")
-    .regex(/^[a-z0-9_-]+$/, {
-      message: "Solo se permiten caracteres alfanuméricos en minúscula, guiones y guiones bajos",
+    .regex(/^[a-z0-9]/, { message: "Debe comenzar con un carácter alfanumérico." })
+    .regex(/^[a-z0-9_-]*$/, {
+      message: "Solo se permiten caracteres alfanuméricos en minúscula, guiones y guiones bajos.",
     });
-export const DatasetSchema = z.object({
-  title: z.string().max(100, "El título debe tener menos de 100 caracteres").optional().default(""),
+export const EmailSchema = () =>
+  z
+    .string()
+    .email("Debe ingresar un correo electrónico válido")
+    .min(5, "El correo electrónico debe tener al menos 5 caracteres")
+    .max(100, "El correo electrónico debe tener menos de 100 caracteres");
+export const datasetSchema = z.object({
+  title: z
+    .string()
+    .max(100, "El título debe tener menos de 100 caracteres")
+    .regex(/^[a-zA-Z0-9]/, { message: "Debe comenzar con un carácter alfanumérico." })
+    .optional()
+    .default(""),
   path: PathSchema().default(""),
   description: z.string().optional().default(""),
   private: z.boolean().optional().default(false),
-  source: z.string().url().optional().default(""),
+  source: z.string().optional().default(""),
   version: z.string().optional().default(""),
 
   author: z.string().optional().default(""),
-  author_email: z.string().optional().default(""), // TODO: Agregar regex para email
+  authorEmail: z.string().optional().default(""),
   maintainer: z.string().optional().default(""),
-  maintainer_email: z.string().optional().default(""), // TODO: Agregar regex para email
+  maintainerEmail: z.string().optional().default(""),
 
   category: z
     .enum(Object.values(Categories).map(({ value }) => value) as [CategoryType])
     .default("others"),
   tags: z
-    .array(z.object({ value: z.string(), label: z.string().optional() }))
-    .min(1, "Debe ingresar al menos una etiqueta")
-    .max(3, "Debe ingresar menos de 3 etiquetas")
+    .array(
+      z
+        .string()
+        .min(3, "Debe ingresar al menos 3 caracteres")
+        .max(100, "Debe ingresar menos de 100 caracteres")
+    )
+    .max(5, "Debe ingresar menos de 6 etiquetas")
     .default([]),
-  license: z.string().optional().default(""),
-  organization: z.string().default(""),
+  license: z.string().optional().default("notspecified"),
+  organization: z.string({ required_error: "Debe ingresar una organización" }).default(""),
   groups: z.array(z.string()).min(1, "Debe ingresar al menos un grupo").default([]),
 });
+export type DatasetForm = z.infer<typeof datasetSchema>;
+
+export type DatasetRequest = {
+  name: string;
+  title?: string;
+  private: boolean;
+  author?: string;
+  author_email?: string;
+  maintainer?: string;
+  maintainer_email?: string;
+  license_id?: string;
+  notes?: string;
+  url?: string;
+  version?: string;
+  tags?: { name: string; display_name?: string }[];
+  extras?: { key: string; value: string }[];
+  groups?: { name: string }[];
+  owner_org: string;
+};
 
 export type Extra = { key: string; value: string };
 /** Interface for Dataset for the backend */
@@ -188,6 +223,21 @@ export interface Dataset {
   groups: Group[];
   category: CategoryType;
 }
+
+export type LicenseResponse = {
+  domain_content: string;
+  id: string;
+  domain_data: string;
+  domain_software: string;
+  family: string;
+  is_generic: string;
+  od_conformance: string;
+  osd_conformance: string;
+  maintainer: string;
+  status: string;
+  url: string;
+  title: string;
+};
 
 export const AdvancedSearchDatasetSchema = z.object({
   title: z.string().optional(),

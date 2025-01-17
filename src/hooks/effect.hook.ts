@@ -48,10 +48,10 @@ export const useEffectAsync = <T = unknown, D = undefined>({
   useEffect(() => {
     let isActive = true;
     asyncFunction()
-      .then((result) => {
+      .then((response) => {
         if (!isActive) return;
-        if (!result || result instanceof Error) return errorFunction(result);
-        successFunction(result.data);
+        if (!response || response instanceof Error) return errorFunction(response);
+        successFunction(response.data);
       })
       .catch((error) => {
         if (isActive) errorFunction(error);

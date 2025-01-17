@@ -15,7 +15,7 @@ export function DefaultLayout({ children }: DefaultLayoutProps) {
           <div className="fixed top-0 left-0 z-10 flex h-navbar-height w-full items-center justify-between bg-white shadow-md bg-gradient-to-r from-custom-primary-2 to-[#842F45]">
             <Navbar />
           </div>
-          <div className="flex flex-col flex-1 w-full items-center justify-center">
+          <div className="flex flex-col flex-1 w-full items-center justify-center bg-custom-primary-1/5">
             <ScrollArea className="w-full mt-navbar-height">
               <div className="-h-navbar-height">{children}</div>
             </ScrollArea>

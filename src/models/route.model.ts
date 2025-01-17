@@ -19,6 +19,9 @@ export const DatasetRoutes = {
   EDIT: "edit",
   MANAGE: "manage",
   RESOURCE: "resource/:id",
+  DICTIONARY: "dictionary",
+  NEW_VIEW: "new-view",
+  NEW_CHART: "new-chart",
 } as const;
 
 export const GroupRoutes = {

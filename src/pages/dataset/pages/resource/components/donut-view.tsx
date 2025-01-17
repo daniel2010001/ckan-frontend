@@ -12,11 +12,10 @@ import DataSelector from "./data-selector";
 import DonutChart from "./donut-chart";
 import RangeSelector from "./range-selector";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-
-type ChartDataItem = Record<string, string | number | Date | boolean>;
+import { Row } from "@/models/ckan";
 
 interface DonutViewProps {
-  data: ChartDataItem[];
+  data: Row[];
 }
 
 export function DonutView({ data }: DonutViewProps) {

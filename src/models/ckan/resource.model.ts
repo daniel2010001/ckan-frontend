@@ -1,4 +1,4 @@
-import { State } from ".";
+import { State, ViewType } from ".";
 
 /** Interface for Resource for the backend */
 export interface ResourceResponse {
@@ -52,12 +52,12 @@ export interface Resource {
 }
 
 export interface ResourceView {
-  description: string;
   id: string;
   package_id: string;
   resource_id: string;
   title: string;
-  view_type: "image_view" | "datatables_view" | "pdf_view" | "audio_view" | "video_view";
+  description: string;
+  view_type: ViewType;
 }
 
 export interface ResourceCreate {

@@ -66,3 +66,11 @@ export interface UserRegister {
   image_url?: string;
   profile_picture?: File;
 }
+
+export type UserRole = "admin" | "editor" | "member";
+export type UserPermission =
+  | "read"
+  | "create_dataset"
+  | "update_dataset"
+  | "delete_dataset"
+  | "manage_group";

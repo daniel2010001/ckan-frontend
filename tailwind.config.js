@@ -4,9 +4,24 @@ export default {
   content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
   theme: {
     extend: {
-      animation: { heartbeat: "heartbeat 10s ease-in-out infinite" },
+      animation: {
+        heartbeat: "heartbeat 10s ease-in-out infinite",
+        float: "float 4s ease-in-out infinite",
+        floatReverse: "floatReverse 4s ease-in-out infinite",
+      },
       keyframes: {
-        heartbeat: { "0%, 100%": { transform: "scale(1)" }, "50%": { transform: "scale(1.1)" } },
+        heartbeat: {
+          "0%, 100%": { transform: "scale(1)" },
+          "50%": { transform: "scale(1.1)" },
+        },
+        float: {
+          "0%, 100%": { transform: "translateY(0)" },
+          "50%": { transform: "translateY(-10px)" },
+        },
+        floatReverse: {
+          "0%, 100%": { transform: "translateY(0)" },
+          "50%": { transform: "translateY(10px)" },
+        },
       },
       borderRadius: {
         lg: "var(--radius)",

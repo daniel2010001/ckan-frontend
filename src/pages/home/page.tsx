@@ -58,7 +58,7 @@ export function Home() {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center">
+    <div className="flex flex-col items-center justify-center bg-custom-primary-4/5">
       {/* Title */}
       <Background>
         <div className="flex flex-col items-center justify-center px-24 py-12 text-center">
@@ -85,19 +85,26 @@ export function Home() {
       {/* Categories */}
       <div className="w-full flex flex-col items-center justify-center px-24 py-12 text-center relative">
         <h1 className="text-2xl mb-8">CATEGOR&Iacute;AS</h1>
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-          {Object.values<Option>(Categories).map((category, index) => (
+        <div className="grid grid-cols-1 justify-center place-content-center gap-4 md:grid-cols-2 lg:grid-cols-4">
+          {Object.values<Option>(Categories).map(({ value, label, icon: IconComponent }, index) => (
             <Link
               key={`category-${index}`}
               to={DatasetRoutes.BASE()}
-              state={{ category: [category.value] }}
+              state={{ category: [value] }}
               className={cn(
                 buttonVariants({ variant: "ghost" }),
-                "flex items-center justify-start border-none h-auto"
+                "border h-28 flex flex-col items-center justify-center",
+                "hover:border-custom-primary-2 hover:bg-custom-primary-2/10",
+                "hover:shadow-custom-primary-2/50 hover:shadow-md",
+                "transform hover:translate-y-[-4px] hover:scale-105 transition-all duration-300"
               )}
             >
-              {category.icon && <category.icon className="mb-2 mx-4 !size-10" />}
-              <p className="text-base font-medium mx-auto">{category.label}</p>
+              {IconComponent && <IconComponent className="!size-10" />}
+              <div className="flex flex-col justify-center items-start h-auto">
+                <p className="text-base font-medium m-auto px-4 overflow-hidden text-ellipsis break-words whitespace-pre-wrap">
+                  {label}
+                </p>
+              </div>
             </Link>
           ))}
         </div>
@@ -106,7 +113,7 @@ export function Home() {
       {/* Dataset list order by */}
       <div className="w-full flex flex-col items-center justify-center px-24 py-12 text-center relative">
         <h1 className="text-2xl mb-8">VER LISTA DE DATOS</h1>
-        <div className="w-full grid grid-cols-1 gap-20 md:grid-cols-2 lg:grid-cols-3">
+        <div className="w-full grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
           {orderBy.map(({ label, icon, value }, index) => (
             <Link
               key={`order-by-${index}`}
@@ -114,7 +121,10 @@ export function Home() {
               state={{ sortBy: value }}
               className={cn(
                 buttonVariants({ variant: "ghost" }),
-                "flex flex-col items-center justify-start border-none h-auto"
+                "border h-36 flex flex-col items-center justify-center",
+                "hover:border-custom-primary-2 hover:bg-custom-primary-2/10",
+                "hover:shadow-custom-primary-2/50 hover:shadow-md",
+                "transform hover:translate-y-[-4px] hover:scale-105 transition-all duration-300"
               )}
             >
               <img src={icon} alt={label} className="w-16 h-16 my-2 mx-4" />

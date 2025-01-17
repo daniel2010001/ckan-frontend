@@ -13,10 +13,10 @@ import {
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useEffect, useRef } from "react";
+import { Row } from "@/models/ckan";
 
-type DataGeneric = Record<string, string | number | boolean | Date>;
 interface BarChartProps {
-  data: DataGeneric[];
+  data: Row[];
   xAxis: string;
   dataKeys: string[];
   totalBar?: boolean;
@@ -85,7 +85,7 @@ export const BarChart: React.FC<BarChartProps> = ({ data, xAxis, dataKeys, total
   const bars = new Map<string, string>();
   // TODO: bug en el bars, cuando dos columnas tiene el mismo nombre el color tiene que ser el mismo
   data.forEach((item) => {
-    const key = item[xAxis].toString();
+    const key = item[xAxis]?.toString() ?? "null";
     const index = dataGrouped.findIndex((group) => group.name === key);
     if (index === -1)
       dataGrouped.push({

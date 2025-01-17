@@ -14,12 +14,14 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { cn } from "@/lib/utils";
 import { Option } from "@/models";
 
-import { Check, ChevronsUpDown, X } from "lucide-react";
+import { Check, ChevronsUpDown, Plus, X } from "lucide-react";
+import { transformToPath } from "@/utils";
 
 interface BaseComboboxProps {
   options: Option[];
   placeholder?: string;
   empty?: React.ReactNode;
+  addNewOption?: (value: string) => void;
   tick?: boolean;
   className?: string;
 }
@@ -38,9 +40,10 @@ interface ComboboxMultipleProps extends BaseComboboxProps {
 type ComboboxProps = ComboboxSimpleProps | ComboboxMultipleProps;
 
 export function Combobox(props: ComboboxProps) {
-  const { value, onChange, options, className, multiple, showTags } = props;
+  const { value, onChange, options, className, multiple, showTags, addNewOption } = props;
   const { placeholder = "Selecciona una opción", empty = "No hay opciones disponibles" } = props;
   const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState("");
 
   function renderLabel() {
     if (!multiple) return options.find((option) => option.value === value)?.label;
@@ -56,13 +59,12 @@ export function Combobox(props: ComboboxProps) {
         : [...value, optionValue];
       onChange(newValue);
     } else onChange(optionValue);
+    setOpen(false);
   }
 
-  function keyConverter(str: string) {
-    return str
-      .toLowerCase()
-      .replace(/\s+/g, "-")
-      .replace(/[^a-z0-9-]/g, "-");
+  function handleAddNewOption() {
+    addNewOption?.(query);
+    setOpen(false);
   }
 
   return (
@@ -79,15 +81,30 @@ export function Combobox(props: ComboboxProps) {
             <ChevronsUpDown className="opacity-50" />
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-full p-0">
-          <Command>
-            <CommandInput placeholder={placeholder} className="h-9" />
+        <PopoverContent className={cn("w-full p-0", className)}>
+          <Command className="z-[60] [&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:text-muted-foreground [&_[cmdk-group]:not([hidden])_~[cmdk-group]]:pt-0 [&_[cmdk-group]]:px-2">
+            <CommandInput placeholder={placeholder} className="h-9" onValueChange={setQuery} />
             <CommandList>
-              <CommandEmpty>{empty}</CommandEmpty>
+              <CommandEmpty
+                className={cn(
+                  "text-center text-sm flex items-center justify-center pt-2 px-2",
+                  typeof empty === "string" && !addNewOption && "py-6"
+                )}
+              >
+                {(addNewOption && (
+                  <Button variant="outline" className="w-full" onClick={handleAddNewOption}>
+                    <Plus className="mr-2 h-4 w-4" />
+                    Añadir
+                  </Button>
+                )) ||
+                  empty}
+              </CommandEmpty>
               <CommandGroup className="flex flex-col gap-1">
-                {options.map((option) => (
+                {options.map((option, index) => (
                   <CommandItem
-                    key={`combobox-${keyConverter(label)}-${keyConverter(option.value)}`}
+                    key={`combobox-${transformToPath(label)}-${index}-${transformToPath(
+                      option.value
+                    )}`}
                     value={option.value}
                     onSelect={() => handleSelect(option.value)}
                     disabled={option.disabled}
@@ -106,7 +123,7 @@ export function Combobox(props: ComboboxProps) {
           </Command>
         </PopoverContent>
       </Popover>
-      {multiple && showTags && (
+      {multiple && showTags && value.length > 1 && (
         <div className="flex flex-wrap gap-2">
           {value.map((v) => {
             const option = options.find((opt) => opt.value === v);
