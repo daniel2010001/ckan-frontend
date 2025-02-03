@@ -1,4 +1,4 @@
-import { LogOut } from "lucide-react";
+import { Building2, Database, LogOut, Users } from "lucide-react";
 
 import {
   DropdownMenu,
@@ -15,7 +15,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useAuthStore, useUserStore } from "@/hooks";
-import { BaseRoutes } from "@/models";
+import { BaseRoutes, DatasetRoutes, GroupRoutes, OrganizationRoutes } from "@/models";
 import { Avatar, AvatarFallback, AvatarImage } from "@radix-ui/react-avatar";
 import { useNavigate } from "react-router-dom";
 import { Fragment } from "react/jsx-runtime";
@@ -30,10 +30,33 @@ type AccountLinkItem = {
 type AccountDropdownItem = {
   icon: React.ReactNode;
   label: string;
-  items: Array<Array<AccountLinkItem>>;
+  items: Array<Array<Omit<AccountLinkItem, "icon">>>;
 };
 
 const accountItems: Array<Array<AccountLinkItem | AccountDropdownItem>> = [
+  [
+    { label: "Datos", icon: <Database />, shortcut: "⇧⌘D", href: DatasetRoutes.BASE() },
+    {
+      label: "Grupos",
+      icon: <Users />,
+      items: [
+        [
+          { label: "Grupos", href: GroupRoutes.BASE() },
+          { label: "Crear grupo", href: GroupRoutes.CREATE },
+        ],
+      ],
+    },
+    {
+      label: "Organizaciones",
+      icon: <Building2 />,
+      items: [
+        [
+          { label: "Organizaciones", href: OrganizationRoutes.BASE() },
+          { label: "Crear organización", href: OrganizationRoutes.CREATE },
+        ],
+      ],
+    },
+  ],
   // [
   //   { icon: <User />, label: "Profile", shortcut: "⇧⌘P" },
   //   { icon: <CreditCard />, label: "Billing", shortcut: "⌘B" },

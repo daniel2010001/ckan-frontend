@@ -40,11 +40,7 @@ export function DataTableColumnHeader<TData, TValue>({
                   {s === "desc" ? <ArrowDown /> : s === "asc" ? <ArrowUp /> : <ChevronsUpDown />}
                 </Button>
               </TooltipTrigger>
-              {notes && (
-                <TooltipContent>
-                  <p>{notes}</p>
-                </TooltipContent>
-              )}
+              <TooltipContent>{<p>{notes ?? title}</p>}</TooltipContent>
             </Tooltip>
           </TooltipProvider>
         </DropdownMenuTrigger>

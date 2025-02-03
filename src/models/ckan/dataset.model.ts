@@ -23,7 +23,7 @@ import {
   MoreHorizontal,
 } from "lucide-react";
 
-export const OrderBy = {
+export const orderBy = {
   // TODO: Instalar el plugin tracking en CKAN para habilitar esta opción
   POPULARITY: { label: "Populares", value: "views_recent desc", disabled: true },
   RELEVANCE: { label: "Relevancia", value: "score desc, metadata_modified desc" },
@@ -33,9 +33,9 @@ export const OrderBy = {
   CREATED_DESC: { label: "Más recientes", value: "metadata_created desc" },
   UPDATED_DESC: { label: "Última modificación", value: "metadata_modified desc" },
 } as const;
-export type OrderByType = (typeof OrderBy)[keyof typeof OrderBy]["value"];
+export type OrderBy = (typeof orderBy)[keyof typeof orderBy]["value"];
 
-export const Categories = {
+export const categories = {
   HEALTH: {
     label: "Salud",
     value: "health",
@@ -81,13 +81,13 @@ export const Categories = {
     value: "technology",
     icon: Cpu,
   },
-  ANOTHER: {
+  OTHERS: {
     label: "Otros",
     value: "others",
     icon: MoreHorizontal,
   },
 } as const;
-export type CategoryType = (typeof Categories)[keyof typeof Categories]["value"];
+export type Category = (typeof categories)[keyof typeof categories];
 
 export const PathSchema = () =>
   z
@@ -104,7 +104,7 @@ export const EmailSchema = () =>
     .email("Debe ingresar un correo electrónico válido")
     .min(5, "El correo electrónico debe tener al menos 5 caracteres")
     .max(100, "El correo electrónico debe tener menos de 100 caracteres");
-export const datasetSchema = z.object({
+export const datasetFormSchema = z.object({
   title: z
     .string()
     .max(100, "El título debe tener menos de 100 caracteres")
@@ -122,9 +122,7 @@ export const datasetSchema = z.object({
   maintainer: z.string().optional().default(""),
   maintainerEmail: z.string().optional().default(""),
 
-  category: z
-    .enum(Object.values(Categories).map(({ value }) => value) as [CategoryType])
-    .default("others"),
+  category: z.string().default("others"),
   tags: z
     .array(
       z
@@ -138,7 +136,7 @@ export const datasetSchema = z.object({
   organization: z.string({ required_error: "Debe ingresar una organización" }).default(""),
   groups: z.array(z.string()).min(1, "Debe ingresar al menos un grupo").default([]),
 });
-export type DatasetForm = z.infer<typeof datasetSchema>;
+export type DatasetForm = z.infer<typeof datasetFormSchema>;
 
 export type DatasetRequest = {
   name: string;
@@ -179,7 +177,7 @@ export interface DatasetResponse {
   organization: OrganizationResponse;
   owner_org: string;
   private: boolean;
-  state: State;
+  state: string;
   title: string;
   type: string;
   url: string;
@@ -212,7 +210,7 @@ export interface Dataset {
   organization: Organization;
   ownerOrg: string;
   private: boolean;
-  isActive: boolean;
+  state: State;
   title: string;
   type: string;
   source: string;
@@ -221,7 +219,7 @@ export interface Dataset {
   extras: Extra[];
   tags: Tag[];
   groups: Group[];
-  category: CategoryType;
+  category: Category;
 }
 
 export type LicenseResponse = {
@@ -239,19 +237,20 @@ export type LicenseResponse = {
   title: string;
 };
 
-export const AdvancedSearchDatasetSchema = z.object({
+export const advancedSearchDatasetSchema = z.object({
   title: z.string().optional(),
   category: z.array(z.string()).optional(),
   tags: z.array(z.string()).optional(),
   organization: z.array(z.string()).optional(),
   groups: z.array(z.string()).optional(),
+  format: z.array(z.string()).optional(),
 });
-export type AdvancedSearchDatasetType = z.infer<typeof AdvancedSearchDatasetSchema>;
+export type AdvancedSearchDatasetType = z.infer<typeof advancedSearchDatasetSchema>;
 
 export type SearchDatasetRequest = {
   q?: string;
   fq?: string;
-  sort?: OrderByType;
+  sort?: OrderBy;
   rows?: number;
   start?: number;
   include_private?: boolean;

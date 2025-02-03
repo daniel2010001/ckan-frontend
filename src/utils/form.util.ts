@@ -20,3 +20,8 @@ export const transformToPath = (text: string): string => {
     .replace(/^-|-$/g, "") // Elimina guiones al inicio y al final
     .replace(/^_|_$/g, ""); // Elimina guiones bajos al inicio y al final
 };
+
+export const filterObject = (obj: Record<string, unknown>): Record<string, unknown> => {
+  const filteredEntries = Object.entries(obj).filter(([_, value]) => value);
+  return Object.fromEntries(filteredEntries);
+};

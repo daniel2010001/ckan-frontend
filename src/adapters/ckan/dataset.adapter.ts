@@ -1,4 +1,4 @@
-import { AdvancedSearchDatasetType, CategoryType, Dataset, DatasetResponse } from "@/models/ckan";
+import { AdvancedSearchDatasetType, categories, Dataset, DatasetResponse } from "@/models/ckan";
 import { GroupAdapter } from "./group.adapter";
 import { OrganizationAdapter } from "./organization.adapter";
 import { ResourceAdapter } from "./resource.adapter";
@@ -9,46 +9,47 @@ import { TagAdapter } from "./tag.adapter";
 export class DatasetAdapter {
   /**
    * Converts a DatasetResponse to a Dataset
-   * @param datasetResponse DatasetResponse to convert
+   * @param data DatasetResponse to convert
    * @returns Dataset
    *
    * @example
    * const dataset = DatasetAdapter.toDataset(datasetResponse);
    */
-  public static toDataset(datasetResponse: DatasetResponse): Dataset {
+  public static toDataset(data: DatasetResponse): Dataset {
+    const category = Object.values(categories).find(
+      ({ value }) => value === data.extras.find(({ key }) => key === "category")?.value
+    );
     return {
-      author: datasetResponse.author,
-      authorEmail: datasetResponse.author_email,
-      creatorUserId: datasetResponse.creator_user_id,
-      id: datasetResponse.id,
-      isOpen: datasetResponse.isopen,
-      licenseId: datasetResponse.license_id,
-      licenseTitle: datasetResponse.license_title,
-      maintainer: datasetResponse.maintainer,
-      maintainerEmail: datasetResponse.maintainer_email,
-      created: new Date(datasetResponse.metadata_created),
-      modified: new Date(datasetResponse.metadata_modified),
-      url: datasetResponse.name,
-      description: datasetResponse.notes,
-      numResources: datasetResponse.num_resources,
-      numTags: datasetResponse.num_tags,
-      organization: OrganizationAdapter.toOrganization(datasetResponse.organization),
-      ownerOrg: datasetResponse.owner_org,
-      private: datasetResponse.private,
-      isActive: StateAdapter.isActive(datasetResponse.state),
-      title: datasetResponse.title,
-      type: datasetResponse.type,
-      source: datasetResponse.url,
-      version: datasetResponse.version,
-      resources: datasetResponse.resources
+      author: data.author,
+      authorEmail: data.author_email,
+      creatorUserId: data.creator_user_id,
+      id: data.id,
+      isOpen: data.isopen,
+      licenseId: data.license_id,
+      licenseTitle: data.license_title,
+      maintainer: data.maintainer,
+      maintainerEmail: data.maintainer_email,
+      created: new Date(data.metadata_created),
+      modified: new Date(data.metadata_modified),
+      url: data.name,
+      description: data.notes,
+      numResources: data.num_resources,
+      numTags: data.num_tags,
+      organization: OrganizationAdapter.toOrganization(data.organization),
+      ownerOrg: data.owner_org,
+      private: data.private,
+      state: StateAdapter.toState(data.state),
+      title: data.title,
+      type: data.type,
+      source: data.url,
+      version: data.version,
+      resources: data.resources
         .map((resource) => ResourceAdapter.toResource(resource))
         .sort((a, b) => a.position - b.position),
-      extras: datasetResponse.extras,
-      tags: datasetResponse.tags.map((item) => TagAdapter.toTag(item)),
-      groups: datasetResponse.groups.map((item) => GroupAdapter.toGroup(item)),
-      category:
-        (datasetResponse.extras.find((item) => item.key === "category")?.value as CategoryType) ??
-        "others",
+      extras: data.extras,
+      tags: data.tags.map((item) => TagAdapter.toTag(item)),
+      groups: data.groups.map((item) => GroupAdapter.toGroup(item)),
+      category: category ?? categories.OTHERS,
     };
   }
 
@@ -68,7 +69,8 @@ export class DatasetAdapter {
       (schema.organization?.length
         ? `+organization:("${schema.organization.join('" OR "')}")`
         : "") +
-      (schema.groups?.length ? `+groups:("${schema.groups.join('" OR "')}")` : "")
+      (schema.groups?.length ? `+groups:("${schema.groups.join('" OR "')}")` : "") +
+      (schema.format?.length ? `+res_format:("${schema.format.join('" OR "')}")` : "")
     );
   }
 }

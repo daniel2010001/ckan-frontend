@@ -1,5 +1,9 @@
 "use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+
 import {
   AlertDialog,
   AlertDialogAction,
@@ -29,17 +33,13 @@ import {
 } from "@/components/ui/select";
 import {
   Field,
-  fieldInfoSchema,
   fieldTypes,
   FormFieldsData,
   formFieldsSchema,
   timestampFormats,
 } from "@/models/ckan/datastore.model";
-import { extractDefaultValues } from "@/utils";
-import { zodResolver } from "@hookform/resolvers/zod";
+
 import { AlertTriangle } from "lucide-react";
-import { useState } from "react";
-import { useForm } from "react-hook-form";
 
 interface FormFieldsProps {
   fields: Field[];
@@ -50,16 +50,19 @@ interface FormFieldsProps {
 
 export default function FormFields({ fields, onSave, onCancel, onSaveAndLoad }: FormFieldsProps) {
   const [isAlertOpen, setIsAlertOpen] = useState(false);
+  const [isTypeChanged, setIsTypeChanged] = useState(false);
   const form = useForm<FormFieldsData>({
     resolver: zodResolver(formFieldsSchema),
-    defaultValues: fields.reduce((acc, field) => {
-      acc[field.id] = {
-        ...extractDefaultValues(fieldInfoSchema),
-        type_override: field.type,
-        ...field.info,
+    defaultValues: fields.reduce<FormFieldsData>((acc, { id, type, info = {} }) => {
+      acc[id] = {
+        label: info.label ?? "",
+        notes: info.notes ?? "",
+        unit: info.unit ?? "",
+        type_override: info.type_override ?? type ?? "",
+        timestamp_format: info.timestamp_format ?? "",
       };
       return acc;
-    }, {} as FormFieldsData),
+    }, {}),
   });
 
   const handleCancel = async () => {
@@ -101,11 +104,11 @@ export default function FormFields({ fields, onSave, onCancel, onSaveAndLoad }: 
                 className="border p-4 rounded-md grid grid-cols-1 md:grid-cols-4 gap-4"
               >
                 <div>
-                  <h3 className="text-lg font-semibold mb-2">
+                  <h3 className="text-lg font-semibold">
                     {field.info?.label || field.id}
                     <span className="text-sm font-normal ml-2">({field.type})</span>
                   </h3>
-                  <p className="text-sm text-gray-500 mb-2">ID: {field.id}</p>
+                  <p className="text-sm text-custom-gray">ID: {field.id}</p>
                 </div>
                 <div className="md:col-span-3 grid grid-cols-1 md:grid-cols-4 gap-4">
                   <FormField
@@ -113,7 +116,7 @@ export default function FormFields({ fields, onSave, onCancel, onSaveAndLoad }: 
                     name={`${field.id}.label`}
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-xl mr-16 text-custom-black">Cabecera</FormLabel>
+                        <FormLabel>Cabecera</FormLabel>
                         <FormControl>
                           <Input {...field} />
                         </FormControl>
@@ -126,9 +129,7 @@ export default function FormFields({ fields, onSave, onCancel, onSaveAndLoad }: 
                     name={`${field.id}.notes`}
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-xl mr-16 text-custom-black">
-                          Descripción
-                        </FormLabel>
+                        <FormLabel>Descripción</FormLabel>
                         <FormControl>
                           <Input {...field} />
                         </FormControl>
@@ -141,19 +142,23 @@ export default function FormFields({ fields, onSave, onCancel, onSaveAndLoad }: 
                     name={`${field.id}.type_override`}
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-xl mr-16 text-custom-black">
-                          Tipo de campo
-                        </FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormLabel>Tipo de campo</FormLabel>
+                        <Select
+                          onValueChange={(value) => {
+                            field.onChange(value);
+                            setIsTypeChanged(true);
+                          }}
+                          defaultValue={field.value}
+                        >
                           <FormControl>
                             <SelectTrigger>
                               <SelectValue placeholder="Selecciona un tipo" />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {Object.values(fieldTypes).map(({ label, value }) => (
-                              <SelectItem key={value} value={value}>
-                                {label}
+                            {Object.values(fieldTypes).map((option) => (
+                              <SelectItem key={option.value} {...option}>
+                                {option.label}
                               </SelectItem>
                             ))}
                           </SelectContent>
@@ -162,13 +167,13 @@ export default function FormFields({ fields, onSave, onCancel, onSaveAndLoad }: 
                       </FormItem>
                     )}
                   />
-                  {typeOverride === "numeric" && (
+                  {typeOverride === fieldTypes.NUMBER.value && (
                     <FormField
                       control={form.control}
                       name={`${field.id}.unit`}
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-xl mr-16 text-custom-black">Unidad</FormLabel>
+                          <FormLabel>Unidad</FormLabel>
                           <FormControl>
                             <Input {...field} />
                           </FormControl>
@@ -177,15 +182,14 @@ export default function FormFields({ fields, onSave, onCancel, onSaveAndLoad }: 
                       )}
                     />
                   )}
-                  {typeOverride === "timestamp" && (
+                  {(typeOverride === fieldTypes.DATE.value ||
+                    typeOverride === fieldTypes.TIMESTAMP.value) && (
                     <FormField
                       control={form.control}
                       name={`${field.id}.timestamp_format`}
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-xl mr-16 text-custom-black">
-                            Formato de fecha
-                          </FormLabel>
+                          <FormLabel>Formato de fecha</FormLabel>
                           <Select onValueChange={field.onChange} defaultValue={field.value}>
                             <FormControl>
                               <SelectTrigger>
@@ -213,12 +217,15 @@ export default function FormFields({ fields, onSave, onCancel, onSaveAndLoad }: 
             <Button type="button" variant="secondary" onClick={handleCancel}>
               Cancelar
             </Button>
-            <Button type="button" variant="default" onClick={handleSave}>
-              Guardar
-            </Button>
-            <Button type="button" variant="destructive" onClick={handleSaveAndContinue}>
-              Guardar y cargar
-            </Button>
+            {isTypeChanged ? (
+              <Button type="button" variant="destructive" onClick={handleSaveAndContinue}>
+                Guardar y cargar
+              </Button>
+            ) : (
+              <Button type="button" variant="default" onClick={handleSave}>
+                Guardar
+              </Button>
+            )}
           </div>
         </form>
       </Form>

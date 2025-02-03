@@ -1,3 +1,5 @@
+import { State } from "./state.model";
+
 export interface GroupResponse {
   id: string;
   name: string;
@@ -20,8 +22,7 @@ export interface Group {
   displayName: string;
   title: string;
   description: string;
-  imageDisplayUrl: string;
-  imageUrl: string;
+  imagen: string;
   created: Date;
-  isActive: boolean;
+  state: State;
 }

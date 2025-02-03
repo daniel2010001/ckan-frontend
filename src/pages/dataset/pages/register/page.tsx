@@ -26,7 +26,7 @@ import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { DatasetRoutes, Option } from "@/models";
-import { Categories, DatasetForm, datasetSchema } from "@/models/ckan";
+import { categories, DatasetForm, datasetFormSchema } from "@/models/ckan";
 import { createDatasets, getLicenses } from "@/services/ckan";
 import { getMyGroups } from "@/services/ckan/group.service";
 import { getMyOrganizations } from "@/services/ckan/organization.service";
@@ -71,7 +71,7 @@ export const ResourceSchema = z.object({
 
 type FormItemType = {
   type: "text" | "select" | "textarea" | "checkbox" | "combobox";
-  name: keyof z.infer<typeof datasetSchema>;
+  name: keyof z.infer<typeof datasetFormSchema>;
   label: string;
   placeholder?: string;
 };
@@ -120,7 +120,7 @@ function InputType({
   placeholder,
 }: {
   type: "text" | "select" | "textarea" | "checkbox" | "combobox";
-  field: ControllerRenderProps<z.infer<typeof datasetSchema>>;
+  field: ControllerRenderProps<z.infer<typeof datasetFormSchema>>;
   placeholder?: string;
 }) {
   const navigate = useNavigate();
@@ -171,7 +171,7 @@ function InputType({
         loadTags();
         break;
       case "category":
-        setOptions(Object.values<Option>(Categories));
+        setOptions(Object.values<Option>(categories));
         break;
       default:
         break;
@@ -243,8 +243,8 @@ export function Register() {
   const [isPathEdited, setIsPathEdited] = useState(false);
 
   const form = useForm<DatasetForm>({
-    resolver: zodResolver(datasetSchema),
-    defaultValues: extractDefaultValues(datasetSchema),
+    resolver: zodResolver(datasetFormSchema),
+    defaultValues: extractDefaultValues(datasetFormSchema),
   });
 
   const { watch, setValue } = form;

@@ -19,7 +19,7 @@ const components: { title: string; to: string }[] = [
   // { title: "GRUPOS", to: BaseRoutes.GROUPS },
   // { title: "NOSOTROS", to: BaseRoutes.ABOUT },
   { title: "Datos", to: BaseRoutes.DATASET },
-  { title: "Organización", to: BaseRoutes.ORGANIZATIONS },
+  { title: "Organización", to: BaseRoutes.ORGANIZATION },
   { title: "Grupos", to: BaseRoutes.GROUPS },
   { title: "Nosotros", to: BaseRoutes.ABOUT },
 ];

@@ -4,17 +4,16 @@ export const formatDate = (date: Date, format: DateFormat) => {
   const options: Intl.DateTimeFormatOptions = {};
   if (format === timestampFormats.DD_MM_YYYY.value)
     return date.toLocaleDateString("es-ES", { day: "2-digit", month: "2-digit", year: "numeric" });
-  const splitFormat = format.split("-");
-  if (splitFormat.includes("quarter")) {
+  if (format.includes("quarter")) {
     const quarter = Math.floor((date.getMonth() + 3) / 3);
-    return `Q${quarter} ${splitFormat.includes("year") ? date.getFullYear() : ""}`;
+    return `Q${quarter} ${format.includes("year") ? date.getFullYear() : ""}`;
   }
-  if (splitFormat.includes("day")) options.day = "numeric";
-  if (splitFormat.includes("month")) options.month = "long";
-  if (splitFormat.includes("year")) options.year = "numeric";
-  if (splitFormat.includes("weekday")) options.weekday = "long";
-  if (splitFormat.includes("hour")) options.hour = "2-digit";
-  if (splitFormat.includes("minute")) options.minute = "2-digit";
+  if (format.includes("day")) options.day = "numeric";
+  if (format.includes("month")) options.month = "long";
+  if (format.includes("year")) options.year = "numeric";
+  if (format.includes("weekday")) options.weekday = "long";
+  if (format.includes("hour")) options.hour = "2-digit";
+  if (format.includes("minute")) options.minute = "2-digit";
   return date.toLocaleDateString("es-ES", options);
 };
 

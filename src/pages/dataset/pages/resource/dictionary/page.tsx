@@ -3,11 +3,11 @@ import { useEffectAsync, useFetchAndLoader } from "@/hooks";
 import { BaseRoutes } from "@/models";
 import { Field, FormFieldsData, Resource } from "@/models/ckan";
 import { createDatastore, getDatastore, getResource, xloaderSubmit } from "@/services/ckan";
-import { loadAbortable } from "@/utils";
+import { filterObject, loadAbortable } from "@/utils";
 import { useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
-import FormFields from "./components/field-form";
+import FormFields from "./components/form-fields";
 
 export default function Dictionary() {
   // TODO: agregar validación de permisos para ver el formulario
@@ -39,18 +39,7 @@ export default function Dictionary() {
 
   const onCancel = () => navigate("..");
   const updateFields = async (data: FormFieldsData) => {
-    const fields = Object.entries(data).map(
-      ([id, { label, notes, type_override, unit, timestamp_format }]) => ({
-        id,
-        info: {
-          label: label || undefined,
-          notes: notes || undefined,
-          type_override: type_override || undefined,
-          unit: unit || undefined,
-          timestamp_format: type_override === "timestamp" ? timestamp_format : undefined,
-        },
-      })
-    );
+    const fields = Object.entries(data).map(([id, info]) => ({ id, info: filterObject(info) }));
     const response = await loadAbortable(createDatastore(resourceId, fields));
     if (!response || response instanceof Error)
       return toast.error("Error al guardar el diccionario");
@@ -71,7 +60,7 @@ export default function Dictionary() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold mb-6">Dynamic Form</h1>
+      <h1 className="text-2xl font-bold mb-6 text-center">Diccionario de {resource?.name}</h1>
       <FormFields
         fields={fields}
         onCancel={onCancel}

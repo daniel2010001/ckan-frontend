@@ -1,11 +1,16 @@
-import { State } from "@/models/ckan";
+import { State, states } from "@/models/ckan";
 
 export class StateAdapter {
-  static toState(state: any): State {
-    return state === "active" ? "active" : "deleted";
-  }
-
-  static isActive(state: State): boolean {
-    return state === "active";
+  static toState(state: string): State {
+    switch (state) {
+      case states.ACTIVE.value:
+        return states.ACTIVE;
+      case states.DELETED.value:
+        return states.DELETED;
+      case states.DRAFT.value:
+        return states.DRAFT;
+      default:
+        return states.INACTIVE;
+    }
   }
 }

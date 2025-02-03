@@ -1,22 +1,35 @@
-import { DatastoreResponse, Datastore, Field, Row } from "@/models/ckan";
+import { DatastoreResponse, Datastore, Field, Row, fieldTypes } from "@/models/ckan";
+import { convertToSystemTimeZone } from "@/utils/data-validation";
 
 export class DatastoreAdapter {
   public static parseRecord = (fields: Field[], record: Row): Row => {
     const parsedRecord: Row = {};
-    fields.forEach(({ id, type }) => {
+    fields.forEach(({ id, type, info: { type_override } = {} }) => {
       const value = record[id];
-      switch (type) {
-        case "text":
+      switch (type_override ?? type) {
+        case fieldTypes.TEXT.value:
           parsedRecord[id] = String(value);
           break;
-        case "numeric":
+        case fieldTypes.NUMBER.value:
           parsedRecord[id] = Number(value);
           break;
-        case "timestamp":
+        case fieldTypes.DATE.value:
+          if (typeof value !== "boolean" && value !== null) {
+            const date = convertToSystemTimeZone(value);
+            parsedRecord[id] = !isNaN(date.getTime()) ? date : null;
+          }
+          break;
+        case fieldTypes.TIME.value:
+          parsedRecord[id] = String(value);
+          break;
+        case fieldTypes.TIMESTAMP.value:
           if (typeof value !== "boolean" && value !== null) {
             const date = new Date(value);
             parsedRecord[id] = !isNaN(date.getTime()) ? date : null;
           }
+          break;
+        case fieldTypes.BOOLEAN.value:
+          parsedRecord[id] = value !== "false" && Boolean(value);
           break;
         default:
           parsedRecord[id] = value;

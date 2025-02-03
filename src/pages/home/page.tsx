@@ -8,7 +8,7 @@ import { Separator } from "@/components/ui/separator";
 import { useEffectAsync, useFetchAndLoader } from "@/hooks";
 import { cn } from "@/lib/utils";
 import { DatasetRoutes, Notice, Option } from "@/models";
-import { Categories } from "@/models/ckan/dataset.model";
+import { categories } from "@/models/ckan/dataset.model";
 import { lastNotices } from "@/services";
 import { NoticesCarousel } from "./components";
 
@@ -86,7 +86,7 @@ export function Home() {
       <div className="w-full flex flex-col items-center justify-center px-24 py-12 text-center relative">
         <h1 className="text-2xl mb-8">CATEGOR&Iacute;AS</h1>
         <div className="grid grid-cols-1 justify-center place-content-center gap-4 md:grid-cols-2 lg:grid-cols-4">
-          {Object.values<Option>(Categories).map(({ value, label, icon: IconComponent }, index) => (
+          {Object.values<Option>(categories).map(({ value, label, icon: IconComponent }, index) => (
             <Link
               key={`category-${index}`}
               to={DatasetRoutes.BASE()}

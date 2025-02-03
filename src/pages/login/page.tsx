@@ -31,7 +31,7 @@ import loginBackground from "@/assets/images/login-background.png";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
-const LoginSchema = z.object({
+const loginSchema = z.object({
   username: z
     .string({
       required_error: "El nombre de usuario es requerido",
@@ -46,7 +46,7 @@ const LoginSchema = z.object({
     })
     .min(8, "La contraseña debe tener al menos 8 caracteres")
     .default(""),
-  remember: z.boolean().default(false).optional(),
+  remember: z.boolean().default(true).optional(),
 });
 
 export function Login() {
@@ -54,12 +54,12 @@ export function Login() {
   const { login, logout, reset } = useAuthStore();
   const { fetchUserDetails } = useUserStore();
 
-  const form = useForm<z.infer<typeof LoginSchema>>({
-    resolver: zodResolver(LoginSchema),
-    defaultValues: extractDefaultValues(LoginSchema),
+  const form = useForm<z.infer<typeof loginSchema>>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: extractDefaultValues(loginSchema),
   });
 
-  const onSubmit = async (data: z.infer<typeof LoginSchema>) => {
+  const onSubmit = async (data: z.infer<typeof loginSchema>) => {
     const authType: AuthType = data.remember ? AuthType.ACCESS_AND_REFRESH : AuthType.TOKEN;
     if (!(await login({ ...data, authType }))) {
       toast.error("Error al iniciar sesión");

@@ -17,9 +17,9 @@ import {
 import { Form, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useEffectAsync, useFetchAndLoader } from "@/hooks";
 import {
-  AdvancedSearchDatasetSchema,
+  advancedSearchDatasetSchema,
   AdvancedSearchDatasetType,
-  Categories,
+  categories,
 } from "@/models/ckan/dataset.model";
 import { Group } from "@/models/ckan/group.model";
 import { Organization } from "@/models/ckan/organization.model";
@@ -29,6 +29,7 @@ import { getOrganizations } from "@/services/ckan/organization.service";
 import { getTags } from "@/services/ckan/tags.service";
 
 import { Filter } from "lucide-react";
+import { getFormats } from "@/services/ckan";
 
 interface FilterSearchProps {
   defaultValues?: AdvancedSearchDatasetType;
@@ -41,9 +42,11 @@ export function FilterSearch({ defaultValues, onSubmit, className }: FilterSearc
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [groups, setGroups] = useState<Group[]>([]);
   const [tags, setTags] = useState<Tag[]>([]);
+  const [formats, setFormats] = useState<string[]>([]);
   const { callEndpoint: loadOrganizations } = useFetchAndLoader(useState);
   const { callEndpoint: loadGroups } = useFetchAndLoader(useState);
   const { callEndpoint: loadTags } = useFetchAndLoader(useState);
+  const { callEndpoint: loadFormats } = useFetchAndLoader(useState);
 
   useEffectAsync({
     asyncFunction: async () => await loadOrganizations(getOrganizations()),
@@ -60,16 +63,22 @@ export function FilterSearch({ defaultValues, onSubmit, className }: FilterSearc
     successFunction: (data) => setTags(data.map(TagAdapter.toTag)),
   });
 
+  useEffectAsync({
+    asyncFunction: async () => await loadFormats(getFormats()),
+    successFunction: (data) => setFormats(data.map((f) => f.toUpperCase())),
+  });
+
   const formEmpty = {
     title: "",
     category: [],
     tags: [],
     organization: [],
     groups: [],
+    format: [],
   };
 
   const form = useForm({
-    resolver: zodResolver(AdvancedSearchDatasetSchema),
+    resolver: zodResolver(advancedSearchDatasetSchema),
     defaultValues: { ...formEmpty, ...defaultValues },
   });
 
@@ -106,7 +115,7 @@ export function FilterSearch({ defaultValues, onSubmit, className }: FilterSearc
                   <Combobox
                     value={field.value}
                     onChange={field.onChange}
-                    options={Object.values(Categories)}
+                    options={Object.values(categories)}
                     placeholder="Selecciona la categoría"
                     className="col-span-3"
                     multiple
@@ -162,6 +171,26 @@ export function FilterSearch({ defaultValues, onSubmit, className }: FilterSearc
                     onChange={field.onChange}
                     options={groups.map((g) => ({ value: g.name, label: g.title }))}
                     placeholder="Selecciona el grupo"
+                    className="col-span-3"
+                    multiple
+                  />
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              name="format"
+              control={form.control}
+              render={({ field }) => (
+                <FormItem className="grid grid-cols-4 items-center gap-4">
+                  <FormLabel className="text-right">Formato</FormLabel>
+                  <Combobox
+                    value={field.value}
+                    onChange={field.onChange}
+                    options={formats
+                      .filter((f) => f.length > 0)
+                      .map((f) => ({ value: f, label: f }))}
+                    placeholder="Selecciona el formato"
                     className="col-span-3"
                     multiple
                   />

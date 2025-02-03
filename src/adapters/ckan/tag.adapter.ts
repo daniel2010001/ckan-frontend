@@ -7,7 +7,7 @@ export class TagAdapter {
       id: tag.id,
       name: tag.name,
       displayName: tag.display_name,
-      isActive: StateAdapter.isActive(tag.state),
+      state: StateAdapter.toState(tag.state),
     };
   }
 }

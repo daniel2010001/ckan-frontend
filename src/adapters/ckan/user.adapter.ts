@@ -1,7 +1,17 @@
-import { User, UserRegister, UserResponse } from "@/models/ckan";
-import { StateAdapter } from "./state.adapter";
+import { Member, MemberResponse, User, userRoles, UserRegister, UserResponse } from "@/models/ckan";
 
 export class UserAdapter {
+  static toMember(user: MemberResponse): Member {
+    const permission = Object.values(userRoles).find(
+      (permission) => permission.value === user.capacity
+    );
+    if (!permission) throw new Error("Invalid user permission");
+    return {
+      ...UserAdapter.toUser(user),
+      role: permission || userRoles.READ,
+    };
+  }
+
   static toUserRequest(user: any): UserRegister {
     return {
       name: user.username,
@@ -24,7 +34,6 @@ export class UserAdapter {
       lastActive: user.last_active,
       activityStreamsEmailNotifications: user.activity_streams_email_notifications,
       sysadmin: user.sysadmin,
-      isActive: StateAdapter.isActive(user.state),
       imageUrl: user.image_url,
       displayName: user.display_name,
       emailHash: user.email_hash,

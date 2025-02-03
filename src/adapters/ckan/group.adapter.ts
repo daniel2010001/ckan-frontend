@@ -1,4 +1,7 @@
 import { Group, GroupResponse } from "@/models/ckan/group.model";
+import { StateAdapter } from "./state.adapter";
+
+import placeholderImage from "@/assets/images/placeholder.png";
 
 export class GroupAdapter {
   static toGroup(group: GroupResponse): Group {
@@ -8,10 +11,9 @@ export class GroupAdapter {
       displayName: group.display_name,
       title: group.title,
       description: group.description,
-      imageDisplayUrl: group.image_display_url,
-      imageUrl: group.image_url,
+      imagen: group.image_display_url || placeholderImage,
       created: new Date(group.created),
-      isActive: group.state === "active",
+      state: StateAdapter.toState(group.state),
     };
   }
 }

@@ -14,16 +14,16 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useEffectAsync, useFetchAndLoader } from "@/hooks";
 import { cn } from "@/lib/utils";
 import { BaseRoutes, DatasetRoutes } from "@/models";
 import { Dataset } from "@/models/ckan";
 import { getDataset } from "@/services/ckan";
-import { formatDate_DD_MMMM_YYYY } from "@/utils";
+import { formatDate, formatDate_DD_MMMM_YYYY } from "@/utils";
 import { AddResource } from "./components/add-resource";
 
 import { ExternalLinkIcon } from "lucide-react";
+import { ResourceCard } from "./components/resource-card";
 
 export function Detail() {
   const url = useParams().url ?? "";
@@ -43,74 +43,86 @@ export function Detail() {
   if (loading) return <div>Loading...</div>;
   if (!dataset) return <div>No se encontró el conjunto de datos</div>;
 
-  const tabs: Array<{ label: string; value: string; disabled?: boolean }> = [
-    { label: "Conjunto de Datos", value: "details" },
-    { label: "Grupos", value: "groups" },
-    { label: "Actividad", value: "activity" },
-  ];
-
   const detailsTable = [
     { label: "Fuente", value: dataset.source },
     { label: "Autor", value: dataset.author },
     { label: "Mantenedor", value: dataset.maintainer },
-    { label: "Categoría", value: dataset.category },
+    { label: "Categoría", value: dataset.category.label },
     { label: "Licencia", value: dataset.licenseTitle },
-    { label: "Estado", value: dataset.isActive ? "Activo" : "Inactivo" },
+    { label: "Estado", value: dataset.state.label },
     { label: "Fecha de creación", value: formatDate_DD_MMMM_YYYY(dataset.created) },
     { label: "Última actualización", value: formatDate_DD_MMMM_YYYY(dataset.modified) },
   ];
 
   return (
-    <Tabs defaultValue="details" className="w-full h-full flex flex-col">
-      <TabsList className="flex w-full justify-start h-navbar-height bg-transparent border-0 border-b-[1px]">
-        {tabs.map(({ value, label, disabled }) => (
-          <TabsTrigger
-            key={`tab-${value}`}
-            className="text-xl mx-4 !border-none !shadow-none"
-            value={value}
-            disabled={disabled}
-          >
-            {label}
-          </TabsTrigger>
-        ))}
-      </TabsList>
-
+    <div className="w-full h-full flex flex-col">
       {/* Dataset details */}
-      <TabsContent value="details" className="container mx-auto px-16 bg-transparent grid gap-y-6">
+      <div className="container mx-auto px-16 bg-transparent grid gap-y-6">
         {/* Title and description */}
         <div className="flex flex-col gap-4">
           <h1 className="text-4xl font-normal my-6 text-start">{dataset.title || dataset.url}</h1>
+          {/* Category */}
+          <div className="flex flex-wrap gap-2">
+            <p className="text-sm text-custom-black">Categoría: </p>
+            <Link to={DatasetRoutes.BASE()} state={{ category: [dataset.category.value] }}>
+              <Badge
+                key={`dataset-category-${dataset.id}`}
+                variant="secondary"
+                className="text-sm px-4 rounded-full font-poppins font-medium"
+              >
+                <dataset.category.icon className="!size-4 mr-2" />
+                {dataset.category.label}
+              </Badge>
+            </Link>
+          </div>
+          {/* Tags */}
+          {dataset.tags.length > 0 && (
+            <div className="flex flex-row gap-2">
+              <p className="text-sm text-custom-black">Etiquetas: </p>
+              <div className="flex flex-wrap gap-2">
+                {dataset.tags.map((tag) => (
+                  <Link
+                    key={`tag-${tag.name}`}
+                    to={DatasetRoutes.BASE()}
+                    state={{ tags: [tag.name] }}
+                    // enviar el tag.name como state
+                  >
+                    <Badge
+                      key={`${dataset.id}-${tag.id}`}
+                      variant="secondary"
+                      className="text-sm px-4 rounded-full font-poppins font-medium"
+                    >
+                      {tag.name}
+                    </Badge>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <span className="text-sm text-custom-black">
+            Creado el {formatDate(dataset.created, "year-month-day")}, última actualización el{" "}
+            {formatDate(dataset.modified, "year-month-day")}
+          </span>
+
           <p className="text-base text-custom-black">
             {dataset.description || "Este dataset no tiene descripción"}
           </p>
         </div>
 
-        {/* Tags */}
-        {dataset.tags.length > 0 && (
-          <div className="flex flex-wrap gap-2">
-            {dataset.tags.map((tag) => (
-              <Link
-                key={`tag-${tag.name}`}
-                to={DatasetRoutes.BASE()}
-                state={{ tags: [tag.name] }}
-                // enviar el tag.name como state
-              >
-                <Badge
-                  key={`${dataset.id}-${tag.id}`}
-                  variant="secondary"
-                  className="text-sm px-4 rounded-full font-poppins font-medium"
-                >
-                  {tag.name}
-                </Badge>
-              </Link>
-            ))}
-            {/* {Array.from(
-              new Set(dataset.resources.filter((r) => r.format).map((r) => r.format))
-            ).map((format) => (
-              <Badge key={`${dataset.id}-${format}`} variant="secondary">
-                {format}
-              </Badge>
-            ))} */}
+        {dataset.resources.length > 0 && (
+          <div className="flex flex-col gap-3">
+            <h1 className="text-xl font-normal text-start">
+              Recurso{dataset.resources.length > 1 && "s"}
+            </h1>
+
+            <ul className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {dataset.resources.map((resource) => (
+                <li key={`resource-${resource.id}`}>
+                  <ResourceCard resource={resource} />
+                </li>
+              ))}
+            </ul>
           </div>
         )}
 
@@ -167,26 +179,26 @@ export function Detail() {
             )}
           </TableBody>
         </Table>
-      </TabsContent>
+      </div>
 
       {/* Dataset groups */}
-      <TabsContent value="groups">
+      {/* <TabsContent value="groups">
         <div className="flex flex-col gap-4">
           <h1 className="text-4xl font-bold mb-2">Grupos</h1>
           <p className="text-xl text-custom-gray">
             {dataset.groups.map((group) => group.title).join(", ")}
           </p>
         </div>
-      </TabsContent>
+      </TabsContent> */}
 
       {/* Dataset activity */}
-      <TabsContent value="activity">
+      {/* <TabsContent value="activity">
         <p className="text-xl text-gray-600">
           Esta página muestra la actividad de un conjunto de datos con sus detalles. Actualmente hay{" "}
           {dataset.numResources} conjuntos de datos en la lista.
         </p>
-      </TabsContent>
-    </Tabs>
+      </TabsContent> */}
+    </div>
     // </div>
   );
 }

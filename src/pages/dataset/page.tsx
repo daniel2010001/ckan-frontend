@@ -36,6 +36,7 @@ export function Datasets() {
       setTotalItems(count);
       setItems(results.map(DatasetAdapter.toDataset));
     },
+    errorFunction: (e) => console.log(e),
     deps: [payload, currentPage],
   });
 

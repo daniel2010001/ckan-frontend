@@ -29,7 +29,7 @@ export function DataTableToolbar<TData>({ table }: DataTableToolbarProps<TData>)
   const isVisible = columnFilter.getIsVisible();
   const facetedFilters: Map<
     (typeof columns)[number],
-    DataTableFacetedFilterProps<TData, any>
+    DataTableFacetedFilterProps<TData, unknown>
   > = new Map();
 
   useEffect(() => {

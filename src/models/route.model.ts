@@ -5,7 +5,7 @@ export enum BaseRoutes {
   NOT_FOUND = "404",
   DATASET = "/datasets",
   GROUPS = "/groups",
-  ORGANIZATIONS = "/organizations",
+  ORGANIZATION = "/organization",
   ABOUT = "/about",
 }
 
@@ -26,14 +26,14 @@ export const DatasetRoutes = {
 
 export const GroupRoutes = {
   BASE: (route: string = ""): string => `${BaseRoutes.GROUPS}/${route}`,
-  REGISTER: "register",
+  CREATE: "new",
   MANAGE: "manage/:name",
   DETAIL: "detail/:name",
 } as const;
 
 export const OrganizationRoutes = {
-  BASE: (route: string = ""): string => `${BaseRoutes.ORGANIZATIONS}/${route}`,
-  REGISTER: "register",
+  BASE: (route: string = ""): string => `${BaseRoutes.ORGANIZATION}/${route}`,
+  CREATE: "new",
   MANAGE: "manage/:name",
   DETAIL: "detail/:name",
 } as const;

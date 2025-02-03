@@ -26,21 +26,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuthStore, useEffectAsync, useFetchAndLoader } from "@/hooks";
 import { cn } from "@/lib/utils";
 import { BaseRoutes, DatasetRoutes } from "@/models";
-import {
-  Datastore,
-  fieldTypes,
-  Resource as ResourceType,
-  timestampFormats,
-  View,
-  viewTypes,
-} from "@/models/ckan";
+import { Datastore, fieldTypes, Resource, timestampFormats, View, viewTypes } from "@/models/ckan";
 import { getDatastore, getResource, getResourceViewList } from "@/services/ckan";
 import { convertFileSize, formatDate } from "@/utils";
 import { BarChart, ControlPanel, DataTable, DonutView, getColumns } from "./components";
 
 import { DownloadIcon, LinkIcon, WrenchIcon } from "lucide-react";
 
-function DataTableView({ resourceId }: { resourceId: string }) {
+function DataTableViewPage({ resourceId }: { resourceId: string }) {
   const [datastore, setDatastore] = useState<Datastore | undefined>();
   const [selectedXAxis, setSelectedXAxis] = useState<string>("");
   const [selectedDataKeys, setSelectedDataKeys] = useState<Array<string>>([]);
@@ -126,10 +119,12 @@ function DataTableView({ resourceId }: { resourceId: string }) {
         </TableHeader>
         <TableBody>
           {datastore.fields.map(({ id, info, type }) => {
-            const { label, notes, unit } = info || {};
-            const fieldType = Object.values(fieldTypes).find(({ value }) => value === type);
+            const { label, notes, unit, type_override, timestamp_format } = info || {};
+            const fieldType = Object.values(fieldTypes).find(
+              ({ value }) => value === type_override || (!type_override && value === type)
+            );
             const timestampFormat = Object.values(timestampFormats).find(
-              ({ value }) => value === info?.timestamp_format
+              ({ value }) => value === timestamp_format
             );
             return (
               <TableRow key={`field-${id}`}>
@@ -173,12 +168,12 @@ export function TablaDetails({ view }: { view: View }) {
   );
 }
 
-export function Resource() {
+export function ResourcePage() {
   const id = useParams().id ?? "";
   const location = useLocation();
   const navigate = useNavigate();
   const { type: isLogged } = useAuthStore();
-  const [resource, setResource] = useState<ResourceType | undefined>(() => location.state);
+  const [resource, setResource] = useState<Resource | undefined>(() => location.state);
   const [resourceViews, setResourceViews] = useState<View[]>([]);
   const { callEndpoint: loadResource, loading } = useFetchAndLoader(useState);
   const { callEndpoint: loadView, loading: loadingView } = useFetchAndLoader(useState);
@@ -331,7 +326,7 @@ export function Resource() {
         {/* Tab for views */}
         {resourceViews.map((view) => (
           <TabsContent key={`view-${view.title}`} value={view.title}>
-            {view.type === viewTypes.TABLE.value && <DataTableView resourceId={resource.id} />}
+            {view.type === viewTypes.TABLE.value && <DataTableViewPage resourceId={resource.id} />}
           </TabsContent>
         ))}
       </Tabs>
@@ -339,4 +334,4 @@ export function Resource() {
   );
 }
 
-export default Resource;
+export default ResourcePage;

@@ -1,7 +1,7 @@
 import { DatastoreResponse, Field, Row } from "@/models/ckan";
 import { createAxiosCall } from "@/utils";
 
-export const getDatastore = (id: string, limit = 32000) =>
+export const getDatastore = (id: string, limit = 100) =>
   createAxiosCall<DatastoreResponse>(
     "GET",
     `/api/ckan/datastore_search/`,
@@ -10,11 +10,7 @@ export const getDatastore = (id: string, limit = 32000) =>
     { params: { resource_id: id, limit, records_format: "objects" } }
   );
 
-type DatastoreCreate = {
-  resource_id: string;
-  force: boolean;
-  fields: Omit<Field, "type">[];
-};
+type DatastoreCreate = { resource_id: string; force: boolean; fields: Omit<Field, "type">[] };
 export const createDatastore = (resourceId: string, fields: Omit<Field, "type">[]) =>
   createAxiosCall<DatastoreCreate, DatastoreCreate>("POST", "/api/ckan/datastore_create/", {
     resource_id: resourceId,
@@ -22,10 +18,7 @@ export const createDatastore = (resourceId: string, fields: Omit<Field, "type">[
     fields,
   });
 
-type XloaderSubmit = {
-  ignore_hash: boolean;
-  resource_id: string;
-};
+type XloaderSubmit = { ignore_hash: boolean; resource_id: string };
 export const xloaderSubmit = (resourceId: string) =>
   createAxiosCall<boolean, XloaderSubmit>("POST", `/api/ckan/xloader_submit/`, {
     ignore_hash: true,

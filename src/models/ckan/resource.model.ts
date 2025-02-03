@@ -20,7 +20,7 @@ export interface ResourceResponse {
   position: number;
   resource_type: string | null;
   size: number;
-  state: State;
+  state: string;
   url: string;
   url_type: string;
 }
@@ -32,7 +32,7 @@ export interface Resource {
 
   name: string;
   description: string;
-  isActive: boolean;
+  state: State;
   size: number;
   format: string;
   hash: string;

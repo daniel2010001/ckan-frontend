@@ -7,7 +7,7 @@ import { Category } from "@/pages/dataset/pages/category";
 import { Detail } from "@/pages/dataset/pages/detail";
 import { Register } from "@/pages/dataset/pages/register";
 import { Tag } from "@/pages/dataset/pages/tag";
-import { Resource } from "@/pages/dataset/pages/resource";
+import { ResourcePage } from "@/pages/dataset/pages/resource";
 import Dictionary from "@/pages/dataset/pages/resource/dictionary/page";
 import NewChart from "@/pages/dataset/pages/resource/new-chart/page";
 import NewView from "@/pages/dataset/pages/resource/new-view/page";
@@ -26,7 +26,7 @@ export function DatasetRoute() {
         <Route path={DatasetRoutes.EDIT} element={<div>Edit</div>} />
         <Route path={DatasetRoutes.MANAGE} element={<div>Manage</div>} />
         <Route path={DatasetRoutes.RESOURCE}>
-          <Route index element={<Resource />} />
+          <Route index element={<ResourcePage />} />
           <Route path={DatasetRoutes.DICTIONARY} element={<Dictionary />} />
           <Route path={DatasetRoutes.NEW_VIEW} element={<NewView />} />
           <Route path={DatasetRoutes.NEW_CHART} element={<NewChart />} />

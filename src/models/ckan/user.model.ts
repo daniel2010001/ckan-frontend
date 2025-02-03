@@ -28,7 +28,6 @@ export interface User {
   lastActive: string | null;
   activityStreamsEmailNotifications: boolean;
   sysadmin: boolean;
-  isActive: boolean;
   imageUrl: string | null;
   displayName: string;
   emailHash: string;
@@ -47,7 +46,6 @@ export const inicialUser: User = {
   lastActive: null,
   activityStreamsEmailNotifications: false,
   sysadmin: false,
-  isActive: false,
   imageUrl: null,
   displayName: "",
   emailHash: "",

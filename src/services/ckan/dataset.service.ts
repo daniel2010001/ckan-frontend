@@ -33,3 +33,8 @@ export const searchDatasets = (data: SearchDatasetRequest) =>
 
 export const getLicenses = () =>
   createAxiosCall<LicenseResponse[]>("GET", `/api/ckan/license_list/`);
+
+export const getFormats = (q: string = "") =>
+  createAxiosCall<Array<string>>("GET", `/api/ckan/format_autocomplete/`, undefined, {
+    params: { q, limit: 10 },
+  });

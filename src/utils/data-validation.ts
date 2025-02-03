@@ -54,10 +54,10 @@ export function getEmailDomain(email: string): string {
   return email.split("@")[1];
 }
 
-export function convertToSystemTimeZone(dateString: string): Date {
+export function convertToSystemTimeZone(dateString: number | string | Date): Date {
   const date = new Date(dateString);
+  if (typeof dateString === "string" && dateString.includes("Z")) return date;
   const offsetMinutes = date.getTimezoneOffset();
   const localDate = new Date(date.getTime() + offsetMinutes * 60 * 1000);
-  // const adjustedDate = new Date(localDate.getTime() + 14400000);
   return localDate;
 }

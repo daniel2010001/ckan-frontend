@@ -1,7 +1,11 @@
 import { z } from "zod";
 
 export const timestampFormats = {
-  YEAR_MONTH_DAY: { label: "Fecha", value: "year-month-day-weekday" },
+  YEAR_MONTH_DAY: { label: "Fecha", value: "year-month-day" },
+  YEAR_MONTH_DAY_WEEKDAY: {
+    label: "Fecha (con día de la semana)",
+    value: "year-month-day-weekday",
+  },
   DD_MM_YYYY: { label: "Fecha con barra", value: "/" },
   FULL_DATE: { label: "Fecha y hora", value: "year-month-day-weekday-hour-minute" },
   MONTH_DAY: { label: "Día del mes", value: "month-day-weekday" },
@@ -16,7 +20,10 @@ export type DateFormat = (typeof timestampFormats)[keyof typeof timestampFormats
 export const fieldTypes = {
   TEXT: { label: "Texto", value: "text" },
   NUMBER: { label: "Número", value: "numeric" },
-  TIMESTAMP: { label: "Fecha en formato ISO", value: "timestamp" },
+  TIMESTAMP: { label: "Fecha (formato ISO)", value: "timestamp" },
+  DATE: { label: "Fecha (YYYY-MM-DD)", value: "date" },
+  TIME: { label: "Hora", value: "time" },
+  BOOLEAN: { label: "Booleano (true-false)", value: "bool" },
 } as const;
 
 export const fieldInfoSchema = z.object({

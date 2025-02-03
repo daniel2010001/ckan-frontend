@@ -14,12 +14,7 @@ import {
 import { useAuthStore } from "@/hooks";
 import { cn } from "@/lib/utils";
 import { DatasetRoutes, Option } from "@/models";
-import {
-  AdvancedSearchDatasetType,
-  OrderBy,
-  OrderByType,
-  SearchDatasetRequest,
-} from "@/models/ckan";
+import { AdvancedSearchDatasetType, orderBy, OrderBy, SearchDatasetRequest } from "@/models/ckan";
 import { FilterSearch } from "./filter-search";
 
 import { Search } from "lucide-react";
@@ -31,10 +26,10 @@ interface SearchInputProps {
 export function SearchInput({ setPayload }: SearchInputProps) {
   const { type: isLogged } = useAuthStore();
   const location = useLocation();
-  const state = location.state as AdvancedSearchDatasetType & { sortBy: OrderByType; q: string };
+  const state = location.state as AdvancedSearchDatasetType & { sortBy: OrderBy; q: string };
   const [query, setQuery] = useState(state?.q ?? "");
   const [search, setSearch] = useState<AdvancedSearchDatasetType>(state ?? {});
-  const [sortBy, setSortBy] = useState<OrderByType>(OrderBy.RELEVANCE.value);
+  const [sortBy, setSortBy] = useState<OrderBy>(orderBy.RELEVANCE.value);
 
   const payload = useMemo(
     () => ({
@@ -54,7 +49,7 @@ export function SearchInput({ setPayload }: SearchInputProps) {
   }, [payload, setPayload]);
 
   // TODO: Revisar por qué no se puede mandar la set function directamente
-  function handleSortBy(value: OrderByType) {
+  function handleSortBy(value: OrderBy) {
     setSortBy(value);
   }
 
@@ -83,9 +78,9 @@ export function SearchInput({ setPayload }: SearchInputProps) {
           <SelectValue placeholder="Ordenar por" />
         </SelectTrigger>
         <SelectContent>
-          {Object.values<Option>(OrderBy).map(({ label, value, disabled }) => (
-            <SelectItem value={value} key={`order-by-${value}`} disabled={disabled}>
-              {label}
+          {Object.values<Option>(orderBy).map((order) => (
+            <SelectItem key={`order-by-${order.value}`} {...order}>
+              {order.label}
             </SelectItem>
           ))}
         </SelectContent>

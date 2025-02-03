@@ -23,7 +23,7 @@ import { extractDefaultValues, loadAbortable } from "@/utils";
 import registerBackground from "@/assets/images/register-background.png";
 import { Loader2 } from "lucide-react";
 
-const RegisterSchema = z
+const userRegisterSchema = z
   .object({
     username: z
       .string({
@@ -73,12 +73,12 @@ const RegisterSchema = z
 export function Register() {
   const navigate = useNavigate();
 
-  const form = useForm<z.infer<typeof RegisterSchema>>({
-    resolver: zodResolver(RegisterSchema),
-    defaultValues: extractDefaultValues(RegisterSchema.innerType()),
+  const form = useForm<z.infer<typeof userRegisterSchema>>({
+    resolver: zodResolver(userRegisterSchema),
+    defaultValues: extractDefaultValues(userRegisterSchema.innerType()),
   });
 
-  const onSubmit = async (data: z.infer<typeof RegisterSchema>) => {
+  const onSubmit = async (data: z.infer<typeof userRegisterSchema>) => {
     // TODO: crear un servicio aparte para subir imágenes
     const response = await loadAbortable(register(UserAdapter.toUserRequest(data)));
     if (!response || ResponseAdapter.isError(response)) return; // TODO: mostrar error

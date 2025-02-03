@@ -29,7 +29,7 @@ export class ResourceAdapter {
       position: resourceResponse.position,
       resourceType: resourceResponse.resource_type,
       size: resourceResponse.size,
-      isActive: StateAdapter.isActive(resourceResponse.state),
+      state: StateAdapter.toState(resourceResponse.state),
       url: resourceResponse.url,
       urlType: resourceResponse.url_type,
     };
